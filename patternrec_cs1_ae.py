@@ -20,7 +20,7 @@ print(face_157)
 # face data is in 46x56 format
 
 face_157 = np.reshape(face_157,(46,56))
-
+#keidikeidi
 plt.imshow(face_157, cmap = 'gist_gray')
 face_157 = face_157.T
 plt.imshow(face_157,cmap = 'gist_gray')
