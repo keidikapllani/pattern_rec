@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import random as rnd
 
-# Load 
+# Load data
 mat_content = sio.loadmat('face.mat')
 
 mat_content # Let's see the content...
@@ -18,17 +18,23 @@ out_data = mat_content['l']
 pt_train = 8
 pt_test = 2
 n_people = 52
-population = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-x_train = face_data
+face_range = list(range(1,11,1))
+
+#Initialise train and test matrices
+x_test = np.zeros((2576,104), dtype = int)
+x_train = np.zeros((2576,400), dtype = int)
+y_test = np.zeros((104,1), dtype = int)
+y_train = np.zeros((400,1), dtype = int)
+#Initialise counter to build output matrices
+ix = 0
 #for each person split data
-for test_ix in range(n_people):
-    #generate random indexes
-    r = rnd.sample(population,2);
-    y_test = y_test + face_data
-
-
-    test_ix = [test_ix (i-1)*10+r];
-
+for ix_splitter in range(n_people):
+    #generate random indexes within the face range per person
+    r = rnd.sample(face_range,pt_test)
+    r = [r[i] + ix_splitter*10 for i in range(len(r))]
+    x_test[:,[ix, ix+1]] = face_data[:,r]
+       
+    ix = ix + 2
     
 
 
