@@ -82,10 +82,11 @@ y = out_data.T
 
 pca = PCA()
 pca.fit(X)
-print(pca.explained_variance_ratio_)  
-print(pca.singular_values_)  
+var_ration = pca.explained_variance_ratio_
+singular_val = pca.singular_values_  
 
-
+plt.plot(singular_val.T)
+plt.show()
 #Perform PCA
 #pca = PCA(n_components=2)
 #pca.fit(face_data)
