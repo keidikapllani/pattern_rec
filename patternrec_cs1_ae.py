@@ -54,7 +54,7 @@ for ix_splitter in range(n_people):
     
 #D ~ dimensionality, N ~ number of entries
 D, N = x_train.shape
-print('The dimensionality of the data is {} , while the datapoint N are =%d', D,N)
+print(f'The dimensionality D of the data is {D} , while the datapoint N are {N}')
 
 # Calculate mean face
 meanface = face_data.mean(axis=1)
@@ -84,21 +84,17 @@ print('dim Se = ', Se.shape)
 _we, _ve = np.linalg.eig(Se)
 _ue = np.dot(A.T, _ve)
 print('dim ue = ',_ue.shape)
+
 #Sort the eigenvalues based on their magnitude
-ws = sorted(abs(_w), reverse=True)
+w_n = sorted(abs(_w), reverse=True)     #naive
+w_e = sorted(abs(_we), reverse=True)    #efficient
 
-#print(ws)
-
-### PCA LIBRARY TEST ###
-#pca = PCA()
-#pca.fit(A)
-#print(pca.explained_variance_ratio_)  
-#print(pca.singular_values_)  
-
-
-#Perform PCA
-#pca = PCA(n_components=2)
-#pca.fit(face_data)
-#PCA(copy=True, iterated_power='auto', n_components=2, random_state=None,
-#svd_solver='auto', tol=0.0, whiten=False)
-#print(pca.explained_variance_ratio_)  
+# Plot eigenvalues for naive and efficient PCA
+x_naive = np.arange(1,len(w_n)+1)
+plt.plot(x_naive,w_n)
+x_effct = np.arange(1,len(w_e)+1)
+plt.plot(x_effct,w_e)
+plt.xlabel('$w_{m}$ ~ $m^{th}$ eigenvalue')
+plt.ylabel('Re{$w_{m}$}')
+plt.title('Ordered eigenvalues - naive and efficient PCA')
+plt.legend(['Naive PCA', 'Efficient PCA'])
