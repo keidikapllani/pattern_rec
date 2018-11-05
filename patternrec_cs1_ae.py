@@ -8,7 +8,6 @@
 import scipy.io as sio
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 import random as rnd
 
 ### Load data
@@ -98,3 +97,10 @@ plt.xlabel('$w_{m}$ ~ $m^{th}$ eigenvalue')
 plt.ylabel('Re{$w_{m}$}')
 plt.title('Ordered eigenvalues - naive and efficient PCA')
 plt.legend(['Naive PCA', 'Efficient PCA'])
+
+# Plot the first 10 eigenface
+for i in range(0,10):
+    plt.subplot(2, 5, i+1)
+    plt.imshow(np.reshape(abs(_v[:,i]),(46,56)).T,cmap = 'gist_gray')
+
+### Reconstruction error as function of number of eigenvalues
