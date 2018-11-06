@@ -62,7 +62,6 @@ print(f'The dimensionality D of the data is {D} , while the datapoints N are {N}
 meanface = face_data.mean(axis=1)
 meanface = np.reshape(meanface,(D,1)) #To correct array shape
 #Plot the mean face
-plt.figure()
 plt.imshow(np.reshape(meanface,(46,56)).T,cmap = 'gist_gray')
 plt.title('Mean Face\n')
 
@@ -97,12 +96,11 @@ Ue = _U / np.apply_along_axis(np.linalg.norm, 0, _U) #normalise each eigenvector
 print('dim ue = ',Ue.shape)
 
 #Sort the eigenvalues based on their magnitude
-w_n = sorted(abs(wn), reverse=True)     #naive
-w_e = sorted(abs(we), reverse=True)    #efficient
+w_n = sorted(np.real(wn), reverse=True)     #naive
+w_e = sorted(np.real(we), reverse=True)    #efficient
 
 # Plot eigenvalues for naive and efficient PCA
 x_naive = np.arange(1,len(w_n)+1)
-plt.figure()
 plt.plot(x_naive,w_n)
 x_effct = np.arange(1,len(w_e)+1)
 plt.plot(x_effct,w_e)
@@ -112,29 +110,26 @@ plt.title('Ordered eigenvalues - naive and efficient PCA')
 plt.legend(['Naive PCA', 'Efficient PCA'])
 
 # Plot the first 10 eigenfaces from the naive PCA
-plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
-    plt.imshow(np.reshape(abs(U[:,i]),(46,56)).T,cmap = 'gist_gray')
+    plt.imshow(np.reshape(np.real(U[:,i]),(46,56)).T,cmap = 'gist_gray')
     
 # Plot the first 10 eigenfaces from the efficient PCA
-plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
-    plt.imshow(np.reshape(abs(Ue[:,i]),(46,56)).T,cmap = 'gist_gray')
+    plt.imshow(np.reshape(np.real(Ue[:,i]),(46,56)).T,cmap = 'gist_gray')
     
 #Apply SVD to eigenvectors of Se to find the eigenvectors of S
 Ue = np.dot(A,V)
 
 
 # Plot the first 10 eigenfaces from the efficient PCA
-plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
-    plt.imshow(np.reshape(abs(V[:,i]),(46,56)).T,cmap = 'gist_gray')
+    plt.imshow(np.reshape(np.real(V[:,i]),(46,56)).T,cmap = 'gist_gray')
 
 ### Reconstruction error as function of number of eigenvalues
-eigsum = abs(sum(wn[:,]))
+eigsum = np.real(sum(wn[:,]))
 csum = 0
 tv = np.zeros((416,),float)
 for m in range(0,416):
@@ -143,22 +138,20 @@ for m in range(0,416):
     
 # Plot reconstruction error as a function of the number of PCs
 x_m = np.arange(1,416+1)
-plt.figure()
 plt.plot(x_m,tv)
 plt.xlabel('Number of principal components $m$')
 plt.ylabel('% reconstruction error')
 plt.title('Reconstruction error \nas function of number of principal components')
-plt.axvspan(90,416, facecolor='#2ca02c', alpha=0.5)
-			
+
 #Reconstruct first face of training
 #rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
-Wm = np.dot(A[:,1].T, abs(U)) #This shoud be a vector N*1
+Wm = np.dot(A[:,1].T, np.real(U)) #This shoud be a vector N*1
 Wm = np.reshape(Wm,(2576,1))
 
-wx = np.zeros((U.shape), dtype = int)
+wx = rec_face = np.zeros((U[:,1].shape), dtype = int)
 for k in range(0,416):
-    wx[:,k] = abs(Wm[k]*abs(U[:,k]))
-    #rec_face = np.sum(rec_face, abs(Wm[k]*abs(U[:,k])))
-wx = wx.sum(axis = 1)    
-rec_face  = sum(wx[:,], meanface[:,0])
-plt.imshow(np.reshape(abs(rec_face),(46,56)).T,cmap = 'gist_gray')
+    wx = Wm[k]*(np.real(U[:,k]))
+    rec_face = rec_face + wx
+	
+rec_face  = rec_face + mean_face
+plt.imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
