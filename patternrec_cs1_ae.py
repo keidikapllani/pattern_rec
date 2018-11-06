@@ -148,10 +148,24 @@ plt.title('Reconstruction error \nas function of number of principal components'
 Wm = np.dot(A[:,1].T, np.real(U)) #This shoud be a vector N*1
 Wm = np.reshape(Wm,(2576,1))
 
-wx = rec_face = np.zeros((U[:,1].shape), dtype = int)
-for k in range(0,416):
-    wx = Wm[k]*(np.real(U[:,k]))
-    rec_face = rec_face + wx
-	
-rec_face  = rec_face + mean_face
+#Find the weighted combination of eigenfaces
+partial_face = np.dot(np.real(U),Wm)
+# Add back the mean	
+rec_face  = partial_face + meanface
 plt.imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
+
+### Explore reconstruction of faces for different M
+plt.figure()
+figix = 1
+#For two different faces
+for f in range(0,1):
+	Wm = np.dot(A[:,7+f].T, np.real(U)) #This shoud be a vector N*1
+	Wm = np.reshape(Wm,(2576,1))
+	#Vary M
+	for m in range(50,450,50):
+		partial_face = np.dot(np.real(U[:,:m]),Wm[:m,])
+		rec_face  = partial_face + meanface
+		plt.subplot(2, 8, figix)
+		plt.imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
+		figix += 1
+	
