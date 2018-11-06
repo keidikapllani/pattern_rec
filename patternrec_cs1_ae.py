@@ -62,6 +62,7 @@ print(f'The dimensionality D of the data is {D} , while the datapoints N are {N}
 meanface = face_data.mean(axis=1)
 meanface = np.reshape(meanface,(D,1)) #To correct array shape
 #Plot the mean face
+plt.figure()
 plt.imshow(np.reshape(meanface,(46,56)).T,cmap = 'gist_gray')
 plt.title('Mean Face\n')
 
@@ -101,6 +102,7 @@ w_e = sorted(abs(we), reverse=True)    #efficient
 
 # Plot eigenvalues for naive and efficient PCA
 x_naive = np.arange(1,len(w_n)+1)
+plt.figure()
 plt.plot(x_naive,w_n)
 x_effct = np.arange(1,len(w_e)+1)
 plt.plot(x_effct,w_e)
@@ -110,11 +112,13 @@ plt.title('Ordered eigenvalues - naive and efficient PCA')
 plt.legend(['Naive PCA', 'Efficient PCA'])
 
 # Plot the first 10 eigenfaces from the naive PCA
+plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
     plt.imshow(np.reshape(abs(U[:,i]),(46,56)).T,cmap = 'gist_gray')
     
 # Plot the first 10 eigenfaces from the efficient PCA
+plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
     plt.imshow(np.reshape(abs(Ue[:,i]),(46,56)).T,cmap = 'gist_gray')
@@ -124,6 +128,7 @@ Ue = np.dot(A,V)
 
 
 # Plot the first 10 eigenfaces from the efficient PCA
+plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
     plt.imshow(np.reshape(abs(V[:,i]),(46,56)).T,cmap = 'gist_gray')
@@ -138,6 +143,7 @@ for m in range(0,416):
     
 # Plot reconstruction error as a function of the number of PCs
 x_m = np.arange(1,416+1)
+plt.figure()
 plt.plot(x_m,tv)
 plt.xlabel('Number of principal components $m$')
 plt.ylabel('% reconstruction error')
