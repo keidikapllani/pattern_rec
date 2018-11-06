@@ -148,7 +148,8 @@ plt.plot(x_m,tv)
 plt.xlabel('Number of principal components $m$')
 plt.ylabel('% reconstruction error')
 plt.title('Reconstruction error \nas function of number of principal components')
-
+plt.axvspan(90,416, facecolor='#2ca02c', alpha=0.5)
+			
 #Reconstruct first face of training
 #rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
 Wm = np.dot(A[:,1].T, abs(U)) #This shoud be a vector N*1
