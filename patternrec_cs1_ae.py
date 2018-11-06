@@ -50,43 +50,54 @@ for ix_splitter in range(n_people):
     ix = ix + 2
     
 #____________________________ Start PCA _____________________________________
+#____________________________________________________________________________
+    
+### 1. MEAN FACE ###
     
 #D ~ dimensionality, N ~ number of entries
 D, N = x_train.shape
-print(f'The dimensionality D of the data is {D} , while the datapoint N are {N}')
+print(f'The dimensionality D of the data is {D} , while the datapoints N are {N}')
 
 # Calculate mean face
 meanface = face_data.mean(axis=1)
+meanface = np.reshape(meanface,(D,1)) #To correct array shape
 #Plot the mean face
 plt.imshow(np.reshape(meanface,(46,56)).T,cmap = 'gist_gray')
 plt.title('Mean Face\n')
 
-##Remove mean face
-A = x_train.T - meanface
-y = out_data.T 
+# Remove mean face from the train data
+A = x_train - meanface #normalised training data D*N
+
+
 #    plt.savefig('data/out/mean_face_eig_a.pdf',
 #                format='pdf', dpi=1000, transparent=True)
 
+### 2. NAIVE PCA ###
 
-S = (1 / N) * np.dot(A.T, A)
+#Covariance matrix
+S = (1 / N) * np.dot(A, A.T) # D*D matrix
 print('dim S = ',S.shape)
-#Eigenvalues and eigenvectors
-_w, _v = np.linalg.eig(S)
-_u = np.dot(A, _v)
-print('dim u = ',_u.shape)
 
-### Efficient PCA, Se ~ N*N matrix
-Se = (1 / N) * np.dot(A, A.T)
+#Eigenvalues and eigenvectors
+wn, U = np.linalg.eig(S)
+print('dim u = ', U.shape)
+# ->   Here we find D eigenval and eigenvectors, however only N are non zero 
+
+
+### 3. Efficient PCA ###
+Se = (1 / N) * np.dot(A.T, A) #Returns a N*N matrix
 print('dim Se = ', Se.shape)
 
 # Calculate eigenvalues `w` and eigenvectors `v`
-_we, _ve = np.linalg.eig(Se)
-_ue = np.dot(A.T, _ve)
-print('dim ue = ',_ue.shape)
+we, V = np.linalg.eig(Se)
+# ->   Here we find only the N eigenval and eigenvectors that are non zero
+_U = np.dot(A, V)
+Ue = _U / np.apply_along_axis(np.linalg.norm, 0, _U) #normalise each eigenvector
+print('dim ue = ',Ue.shape)
 
 #Sort the eigenvalues based on their magnitude
-w_n = sorted(abs(_w), reverse=True)     #naive
-w_e = sorted(abs(_we), reverse=True)    #efficient
+w_n = sorted(abs(wn), reverse=True)     #naive
+w_e = sorted(abs(we), reverse=True)    #efficient
 
 # Plot eigenvalues for naive and efficient PCA
 x_naive = np.arange(1,len(w_n)+1)
@@ -98,9 +109,33 @@ plt.ylabel('Re{$w_{m}$}')
 plt.title('Ordered eigenvalues - naive and efficient PCA')
 plt.legend(['Naive PCA', 'Efficient PCA'])
 
-# Plot the first 10 eigenface
+# Plot the first 10 eigenfaces from the naive PCA
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
-    plt.imshow(np.reshape(abs(_v[:,i]),(46,56)).T,cmap = 'gist_gray')
+    plt.imshow(np.reshape(abs(U[:,i]),(46,56)).T,cmap = 'gist_gray')
+    
+# Plot the first 10 eigenfaces from the efficient PCA
+for i in range(0,10):
+    plt.subplot(2, 5, i+1)
+    plt.imshow(np.reshape(abs(Ue[:,i]),(46,56)).T,cmap = 'gist_gray')
+    
+#Apply SVD to eigenvectors of Se to find the eigenvectors of S
+Ue = np.dot(A,V)
+
+
+# Plot the first 10 eigenfaces from the efficient PCA
+for i in range(0,10):
+    plt.subplot(2, 5, i+1)
+    plt.imshow(np.reshape(abs(V[:,i]),(46,56)).T,cmap = 'gist_gray')
 
 ### Reconstruction error as function of number of eigenvalues
+
+#Reconstruct first face of training
+rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
+Wm = np.dot(A[:,1].T, abs(U)) #This shoud be a vector N*1
+
+for k in range(0,416):
+    rec_face = np.sum(rec_face, abs(Wm[k]*U[:,k]))
+    
+rec_face  = sum(rec_face, meanface)
+plt.imshow(np.reshape(abs(rec_face),(46,56)).T,cmap = 'gist_gray')
