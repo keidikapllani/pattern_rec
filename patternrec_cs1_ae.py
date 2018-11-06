@@ -129,13 +129,29 @@ for i in range(0,10):
     plt.imshow(np.reshape(abs(V[:,i]),(46,56)).T,cmap = 'gist_gray')
 
 ### Reconstruction error as function of number of eigenvalues
+eigsum = abs(sum(wn[:,]))
+csum = 0
+tv = np.zeros((416,),float)
+for m in range(0,416):
+    csum = csum + wn[m]
+    tv[m] = 100 - 100*csum/eigsum
+    
+# Plot reconstruction error as a function of the number of PCs
+x_m = np.arange(1,416+1)
+plt.plot(x_m,tv)
+plt.xlabel('Number of principal components $m$')
+plt.ylabel('% reconstruction error')
+plt.title('Reconstruction error \nas function of number of principal components')
 
 #Reconstruct first face of training
-rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
+#rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
 Wm = np.dot(A[:,1].T, abs(U)) #This shoud be a vector N*1
+Wm = np.reshape(Wm,(2576,1))
 
+wx = np.zeros((U.shape), dtype = int)
 for k in range(0,416):
-    rec_face = np.sum(rec_face, abs(Wm[k]*U[:,k]))
-    
-rec_face  = sum(rec_face, meanface)
+    wx[:,k] = abs(Wm[k]*abs(U[:,k]))
+    #rec_face = np.sum(rec_face, abs(Wm[k]*abs(U[:,k])))
+wx = wx.sum(axis = 1)    
+rec_face  = sum(wx[:,], meanface[:,0])
 plt.imshow(np.reshape(abs(rec_face),(46,56)).T,cmap = 'gist_gray')
