@@ -118,25 +118,7 @@ Ue = np.dot(A,V)
 # Plot the first 10 eigenfaces from the efficient PCA
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
-    plt.imshow(np.reshape(np.real(V[:,i]),(46,56)).T,cmap = 'gist_gray')
-
-### Reconstruction error as function of number of eigenvalues
-eigsum = np.real(sum(wn[:,]))
-csum = 0
-tv = np.zeros((416,),float)
-for m in range(0,416):
-    csum = csum + wn[m]
-    tv[m] = 100 - 100*csum/eigsum
-    
-# Plot reconstruction error as a function of the number of PCs
-x_m = np.arange(1,416+1)
-plt.plot(x_m,tv)
-plt.xlabel('Number of principal components $M$', fontsize = 14)
-plt.ylabel('% error', fontsize = 14)
-plt.title('Reconstruction error \nas function of number of principal components'
-		  , fontsize = 16)
-plt.legend(['Theoretical', 'Training data', 'Test data'], fontsize = 14)
-plt.tight_layout()
+    plt.imshow(np.reshape(np.real(V[:,i]),(46,56)).T,cmap = 'gist_gray')    
 
 #Reconstruct first face of training
 #rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
@@ -149,18 +131,59 @@ partial_face = np.dot(np.real(U),Wm)
 rec_face  = partial_face + meanface
 plt.imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
 
-### Explore reconstruction of faces for different M
-plt.figure()
-figix = 1
+
+#______________________________________________________________________________
+### FACE RECONSTRUCTION VARYING M
+
+### Theoretical reconstruction error as function of number of eigenvalues
+eigsum = np.real(sum(wn[:,]))
+csum = 0
+J = np.zeros((416,),float)
+for m in range(0,416):
+    csum = csum + wn[m]
+    J[m] = 100 - 100*csum/eigsum
+	
+# Plot reconstruction error as a function of the number of PCs
+x_m = np.arange(1,416+1)
+plt.plot(x_m,J)
+plt.xlabel('Number of principal components $M$', fontsize = 14)
+plt.ylabel('$J_{\%}$ ~ % error', fontsize = 14)
+plt.title('Reconstruction error \nas function of number of principal components'
+		  , fontsize = 16)
+plt.legend(['Theoretical', 'Training data', 'Test data'], fontsize = 14)
+plt.tight_layout()
+
+im_r = 0
+_none, axarr = plt.subplots(2, 5)
 #For two different faces
-for f in range(0,1):
-	Wm = np.dot(A[:,7+f].T, np.real(U)) #This shoud be a vector N*1
+for f in range(0,2):
+	# Plot the original face first
+	axarr[im_r,0].imshow(np.reshape(np.real(x_train[:,7+f]),(46,56)).T,cmap = 'gist_gray')
+	axarr[im_r,0].axis('off')
+	#Plot title only for the firsy row of the subplot
+	if im_r == 0:
+		axarr[im_r,0].set_title("Original\nface", fontsize = 14)
+	
+	#Find the weights for each eigenfaces
+	Wm = np.dot(x_train[:,7+f].T, np.real(U)) #This shoud be a vector N*1
 	Wm = np.reshape(Wm,(2576,1))
+	
 	#Vary M
-	for m in range(50,450,50):
+	M = ['#',300,150,50,6]
+	print(f'Iteration {f}, row = {im_r}, col = {figix}')
+	for im_n in range(1,5):
+		m = M[im_n]
+		#Reconstruct face
 		partial_face = np.dot(np.real(U[:,:m]),Wm[:m,])
 		rec_face  = partial_face + meanface
-		plt.subplot(2, 8, figix)
-		plt.imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
-		figix += 1
+		
+		#Plot the reconstructed face in the subplot
+		axarr[im_r,im_n].imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
+		axarr[im_r,im_n].axis('off')
+		#Print titles only for the first row
+		if im_r == 0:
+			err = np.round_(J[m-1],1)
+			axarr[im_r,im_n].set_title(f"M = {m}\n$J \simeq {err}\%$", fontsize = 14)
 	
+	im_r += 1 #subplot row
+plt.tight_layout()

@@ -11,7 +11,6 @@ import matplotlib.gridspec as gridspec
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
-
 # Plot eigenvalues for naive and efficient PCA_________________________________
 x_naive = np.arange(1,len(w_n)+1)
 x_effct = np.arange(1,len(w_e)+1)
