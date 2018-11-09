@@ -187,3 +187,41 @@ for f in range(0,2):
 	
 	im_r += 1 #subplot row
 plt.tight_layout()
+
+
+### Test image reconstruction__________________________________________________
+#1.Remove training mean from test image
+#2.Project onto the egenspace a_i = x_n.T u_i
+#3.Represent the projection vector as w = [a1,a2,...aM].T
+
+FI = x_test - meanface
+w_test = np.dot(FI[:,2].T, np.real(U)) #This shoud be a vector N*1
+W_test = np.reshape(w_test,(2576,1))
+m = 300
+partial_face = np.dot(np.real(U[:,:m]),W_test[:m,])
+rec_test_face  = partial_face + meanface
+
+_none, axarr = plt.subplots(1, 4)
+
+axarr[0].imshow(np.reshape(np.real(x_test[:,2]),(46,56)).T,cmap = 'gist_gray')
+axarr[0].axis('off')
+axarr[0].set_title("$\mathbf{x}_{test}$", fontsize = 20)
+
+axarr[1].imshow(np.reshape(np.real(rec_test_face),(46,56)).T,cmap = 'gist_gray')
+axarr[1].axis('off')
+axarr[1].set_title("$\mathbf{\widetilde{x}}_{test}, M = 300$", fontsize = 20)
+
+axarr[2].imshow(np.reshape(np.real(x_train[:,12]),(46,56)).T,cmap = 'gist_gray')
+axarr[2].axis('off')
+axarr[2].set_title("$\mathbf{x}_{train}$", fontsize = 20)
+
+w_tr = np.dot(x_train[:,12].T, np.real(U)) #This shoud be a vector N*1
+W_tr = np.reshape(w_tr,(2576,1))
+partial_tr_face = np.dot(np.real(U[:,:m]),w_tr[:m,])
+rec_train_face  = partial_tr_face + meanface
+
+axarr[3].imshow(np.reshape(np.real(partial_tr_face),(46,56)).T,cmap = 'gist_gray')
+axarr[3].axis('off')
+axarr[3].set_title("$\mathbf{\widetilde{x}}_{train}, M = 300$", fontsize = 20)
+
+plt.tight_layout()
