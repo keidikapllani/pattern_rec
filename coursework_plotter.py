@@ -11,7 +11,24 @@ import matplotlib.gridspec as gridspec
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 
-# Generate plot with mean face and first 6 eigenfaces
+
+# Plot eigenvalues for naive and efficient PCA_________________________________
+x_naive = np.arange(1,len(w_n)+1)
+x_effct = np.arange(1,len(w_e)+1)
+lines = plt.plot(x_naive,w_n, x_effct,w_e)
+l1, l2 = lines
+plt.setp(l1, linewidth=4, color= '#0055ff')
+plt.setp(l2, linewidth=4, color='#00aa00')
+plt.xlabel('$\lambda_{m}$ ~ $m^{th}$ eigenvalue', fontsize = 14)
+plt.ylabel('Re{$\lambda_{m}$}', fontsize = 14)
+plt.title('Ordered eigenvalues from PCA', fontsize = 16)
+plt.legend(['Simple PCA', 'Optimised PCA'], fontsize = 14)
+plt.tight_layout()
+#______________________________________________________________________________
+
+
+
+# Generate plot with mean face and first 6 eigenfaces__________________________
 plt.figure()
 grid = gridspec.GridSpec(2, 5, wspace=0.2, hspace=0.1)
 
@@ -49,5 +66,5 @@ plt.subplot(grid[1, 4])
 plt.imshow(np.reshape(abs(U[:,5]),(46,56)).T,cmap = 'gist_gray')
 plt.title(r'$\mathbf{u}_{6}$')
 plt.axis('off')
-	
+#______________________________________________________________________________	
 	

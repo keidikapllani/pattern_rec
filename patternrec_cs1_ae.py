@@ -99,15 +99,7 @@ print('dim ue = ',Ue.shape)
 w_n = sorted(np.real(wn), reverse=True)     #naive
 w_e = sorted(np.real(we), reverse=True)    #efficient
 
-# Plot eigenvalues for naive and efficient PCA
-x_naive = np.arange(1,len(w_n)+1)
-plt.plot(x_naive,w_n)
-x_effct = np.arange(1,len(w_e)+1)
-plt.plot(x_effct,w_e)
-plt.xlabel('$w_{m}$ ~ $m^{th}$ eigenvalue')
-plt.ylabel('Re{$w_{m}$}')
-plt.title('Ordered eigenvalues - naive and efficient PCA')
-plt.legend(['Naive PCA', 'Efficient PCA'])
+
 
 # Plot the first 10 eigenfaces from the naive PCA
 for i in range(0,10):
@@ -139,9 +131,12 @@ for m in range(0,416):
 # Plot reconstruction error as a function of the number of PCs
 x_m = np.arange(1,416+1)
 plt.plot(x_m,tv)
-plt.xlabel('Number of principal components $m$')
-plt.ylabel('% reconstruction error')
-plt.title('Reconstruction error \nas function of number of principal components')
+plt.xlabel('Number of principal components $M$', fontsize = 14)
+plt.ylabel('% error', fontsize = 14)
+plt.title('Reconstruction error \nas function of number of principal components'
+		  , fontsize = 16)
+plt.legend(['Theoretical', 'Training data', 'Test data'], fontsize = 14)
+plt.tight_layout()
 
 #Reconstruct first face of training
 #rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
