@@ -182,5 +182,3 @@ plt.tight_layout()
 
 
 ### RECOGNITION WITH MINIMUM SUBSPACE RECONSTRUCTION ERROR ###_________________
-
-
