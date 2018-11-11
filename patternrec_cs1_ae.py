@@ -10,6 +10,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as rnd
 from numpy import linalg as LA
+from sklearn.neighbors import KNeighborsClassifier  
+from sklearn.metrics import classification_report,accuracy_score,confusion_matrix
+import time
 
 ### Load data
 mat_content = sio.loadmat('face.mat')
@@ -178,7 +181,64 @@ plt.legend(['Theoretical', 'Training set', 'Test set'], fontsize = 14)
 plt.tight_layout()
 		
 ### RECOGNITION WITH NN ###____________________________________________________
+k = 1 # number of neighbors (hyperparameter)
+# Generate KNN classifier
+knn_classifier = KNeighborsClassifier(n_neighbors = k)
+# Train the classifier
+knn_classifier.fit(x_train, y_train)
 
+# Classify the test data
+y_pred = classifier.predict(X_test)  
+
+# Classification metrics
+print(confusion_matrix(y_test, y_pred))  
+print(classification_report(y_test, y_pred))
+
+
+### KNN Classifier accuracy as function of hyperparameters M and K
+accuracy = np.zeros((5,416),float)
+t_compression = []
+t_train = np.zeros((5,416),float)
+t_test = np.zeros((5,416),float)
+# Increment M
+for m in range(0,416):
+	#Measure the data compression time
+	_t_comp = time.time()
+	#Reconstruct test set using m PCs
+	recon_test = np.dot(np.real(U[:,:m]),W_test[:m,:]) + meanface
+	t_compression.append([time.time() - _t_comp])
+	# Increment K
+	for k in range(1, 6):
+		# Train classifier
+		_t_train = time.time()
+		knn = KNeighborsClassifier(n_neighbors = k)
+		knn.fit(x_train.T, y_train.T)
+		# Measure training time
+		t_train[k-1,m] = time.time() - _t_train
+		
+		# Classification of test data
+		_t_test = time.time()
+		y_knn = knn.predict(recon_test.T)
+		accuracy[k-1, m] = 100*accuracy_score(y_test.T, y_knn)
+		# Measure classification time
+		t_test[k-1,m] = time.time() - _t_test
+
+
+#Plot accuracy vs hyperparameters
+plt.imshow(accuracy,aspect = 'auto',cmap = 'RdYlGn')
+cb = plt.colorbar()
+cb.set_label('$\%$ Accuracy',fontsize=14)
+plt.xlabel('$M$ ~ Number of principal components', fontsize = 14)
+plt.ylabel('$k$ neighbours', fontsize = 14)
+plt.title('KNN Classifier accuracy\nas function of the hyperparameters'
+		  , fontsize = 16)
+# pct memory usage
+#memory.append(psutil.Process(os.getpid()).memory_percent())
 
 
 ### RECOGNITION WITH MINIMUM SUBSPACE RECONSTRUCTION ERROR ###_________________
+
+#For each class
+for c in range(1,53):
+	#Create a subspace
+	
