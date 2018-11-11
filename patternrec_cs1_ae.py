@@ -42,51 +42,73 @@ for ix_splitter in range(n_people):
     indx = rnd.sample(rng,pt_test)
     r = [indx[i] + ix_splitter*10 for i in range(len(indx))]
     x_test[:,[ix, ix+1]] = face_data[:,r]
-    y_test[:,[ix, ix+1]] = out_data[:,r]
-    print(r)    
+    y_test[:,[ix, ix+1]] = out_data[:,r]   
     x_train = np.delete(x_train,r[0]-ix,1)
     x_train = np.delete(x_train,r[1]-ix,1)
     y_train = np.delete(y_train,r[0]-ix,1)
     y_train = np.delete(y_train,r[1]-ix,1)
-#   
-#        
-        
+    
     ix = ix + 2
     
-#    
-#
-#
-#
-#print(face_data) # Each column represents one face image, each row a pixel value for a particular coordinate of the image
-#print(face_data.shape)
-#face_157 = face_data[:,157]
-#
-#print(face_157.shape)
-#print(face_157)
-## face data is in 46x56 format
-#
-#face_157 = np.reshape(face_157,(46,56))
-#plt.imshow(face_157, cmap = 'gist_gray')
-#face_157 = face_157.T
-#plt.imshow(face_157,cmap = 'gist_gray')
-#
-##Find mean face
-meanface1 = face_data.mean(axis=1)
-meanface=np.reshape(meanface1,(46,56))
-meanface = meanface.T
-plt.imshow(meanface,cmap = 'gist_gray')
-#
+#____________________________ Start PCA _____________________________________
+    
+#D ~ dimensionality, N ~ number of entries
+D, N = x_train.shape
+print('The dimensionality of the data is {%d} , while the datapoint N are =%d', D,N)
+
+# Calculate mean face
+meanface = face_data.mean(axis=1)
+#Plot the mean face
+#plt.imshow(np.reshape(meanface,(46,56)).T,cmap = 'gist_gray')
+#plt.title('Mean Face\n')
+
 ##Remove mean face
-X = face_data.T - meanface1
+A = x_train.T - meanface
 y = out_data.T 
+#    plt.savefig('data/out/mean_face_eig_a.pdf',
+#                format='pdf', dpi=1000, transparent=True)
 
-pca = PCA()
-pca.fit(X)
-var_ration = pca.explained_variance_ratio_
-singular_val = pca.singular_values_  
 
-plt.plot(singular_val.T)
-plt.show()
+S = (1 / N) * np.dot(A.T, A)
+print('dim S = ',S.shape)
+#Eigenvalues and eigenvectors
+_w, _v = np.linalg.eig(S)
+_u = np.dot(A, _v)
+print('dim u = ',_u.shape)
+
+
+
+
+### Efficient PCA, Se ~ N*N matrix
+Se = (1 / N) * np.dot(A, A.T)
+print('dim Se = ', Se.shape)
+
+# Calculate eigenvalues `w` and eigenvectors `v`
+_we, _ve = np.linalg.eig(Se)
+_ue = np.dot(A.T, _ve)
+print('dim ue = ',_ue.shape)
+#Sort the eigenvalues based on their magnitude
+ws = sorted(abs(_w), reverse=True)
+
+print(ws)
+plt.clf()
+plt.figure()
+plt.plot(ws)
+plt.xlim(-25,200)
+#pca = PCA()
+#pca.fit(A)
+#var_ration = pca.explained_variance_ratio_
+#singular_val = pca.singular_values_  
+### PCA LIBRARY TEST ###
+#pca = PCA()
+#pca.fit(A)
+#print(pca.explained_variance_ratio_)  
+#print(pca.singular_values_)  
+
+
+
+#plt.plot(singular_val.T)
+#plt.show()
 #Perform PCA
 #pca = PCA(n_components=2)
 #pca.fit(face_data)
