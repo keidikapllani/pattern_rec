@@ -56,11 +56,7 @@ for ix_splitter in range(n_people):
     
 #D ~ dimensionality, N ~ number of entries
 D, N = x_train.shape
-<<<<<<< HEAD
-print('The dimensionality of the data is {%d} , while the datapoint N are =%d', D,N)
-=======
 print(f'The dimensionality D of the data is {D} , while the datapoints N are {N}')
->>>>>>> f1bb5386300a4e223bf1b1f062a6c9be900ea4c9
 
 # Calculate mean face
 meanface = face_data.mean(axis=1)
@@ -88,15 +84,8 @@ print('dim u = ', U.shape)
 # ->   Here we find D eigenval and eigenvectors, however only N are non zero 
 
 
-<<<<<<< HEAD
-
-
-### Efficient PCA, Se ~ N*N matrix
-Se = (1 / N) * np.dot(A, A.T)
-=======
 ### 3. Efficient PCA ###
 Se = (1 / N) * np.dot(A.T, A) #Returns a N*N matrix
->>>>>>> f1bb5386300a4e223bf1b1f062a6c9be900ea4c9
 print('dim Se = ', Se.shape)
 
 # Calculate eigenvalues `w` and eigenvectors `v`
@@ -222,22 +211,6 @@ axarr[1].imshow(np.reshape(np.real(rec_test_face),(46,56)).T,cmap = 'gist_gray')
 axarr[1].axis('off')
 axarr[1].set_title("$\mathbf{\widetilde{x}}_{test}, M = 300$", fontsize = 20)
 
-<<<<<<< HEAD
-print(ws)
-plt.clf()
-plt.figure()
-plt.plot(ws)
-plt.xlim(-25,200)
-#pca = PCA()
-#pca.fit(A)
-#var_ration = pca.explained_variance_ratio_
-#singular_val = pca.singular_values_  
-### PCA LIBRARY TEST ###
-#pca = PCA()
-#pca.fit(A)
-#print(pca.explained_variance_ratio_)  
-#print(pca.singular_values_)  
-=======
 axarr[2].imshow(np.reshape(np.real(x_train[:,12]),(46,56)).T,cmap = 'gist_gray')
 axarr[2].axis('off')
 axarr[2].set_title("$\mathbf{x}_{train}$", fontsize = 20)
@@ -246,22 +219,9 @@ w_tr = np.dot(x_train[:,12].T, np.real(U)) #This shoud be a vector N*1
 W_tr = np.reshape(w_tr,(2576,1))
 partial_tr_face = np.dot(np.real(U[:,:m]),w_tr[:m,])
 rec_train_face  = partial_tr_face + meanface
->>>>>>> f1bb5386300a4e223bf1b1f062a6c9be900ea4c9
 
 axarr[3].imshow(np.reshape(np.real(partial_tr_face),(46,56)).T,cmap = 'gist_gray')
 axarr[3].axis('off')
 axarr[3].set_title("$\mathbf{\widetilde{x}}_{train}, M = 300$", fontsize = 20)
 
-<<<<<<< HEAD
-
-#plt.plot(singular_val.T)
-#plt.show()
-#Perform PCA
-#pca = PCA(n_components=2)
-#pca.fit(face_data)
-#PCA(copy=True, iterated_power='auto', n_components=2, random_state=None,
-#svd_solver='auto', tol=0.0, whiten=False)
-#print(pca.explained_variance_ratio_)  
-=======
 plt.tight_layout()
->>>>>>> f1bb5386300a4e223bf1b1f062a6c9be900ea4c9
