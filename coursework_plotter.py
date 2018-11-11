@@ -66,4 +66,74 @@ plt.imshow(np.reshape(abs(U[:,5]),(46,56)).T,cmap = 'gist_gray')
 plt.title(r'$\mathbf{u}_{6}$')
 plt.axis('off')
 #______________________________________________________________________________	
+#______________________________________________________________________________
+### FACE RECONSTRUCTION VARYING M
+
+im_r = 0
+_none, axarr = plt.subplots(2, 5)
+#For two different faces
+for f in range(0,2):
+	# Plot the original face first
+	axarr[im_r,0].imshow(np.reshape(np.real(x_train[:,7+f]),(46,56)).T,cmap = 'gist_gray')
+	axarr[im_r,0].axis('off')
+	#Plot title only for the firsy row of the subplot
+	if im_r == 0:
+		axarr[im_r,0].set_title("Original\nface", fontsize = 14)
 	
+	#Find the weights for each eigenfaces
+	Wm = np.dot(x_train[:,7+f].T, np.real(U)) #This shoud be a vector N*1
+	Wm = np.reshape(Wm,(2576,1))
+	
+	#Vary M
+	M = ['#',300,150,50,6]
+	print(f'Iteration {f}, row = {im_r}, col = {figix}')
+	for im_n in range(1,5):
+		m = M[im_n]
+		#Reconstruct face
+		partial_face = np.dot(np.real(U[:,:m]),Wm[:m,])
+		rec_face  = partial_face + meanface
+		
+		#Plot the reconstructed face in the subplot
+		axarr[im_r,im_n].imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
+		axarr[im_r,im_n].axis('off')
+		#Print titles only for the first row
+		if im_r == 0:
+			err = np.round_(J[m-1],1)
+			axarr[im_r,im_n].set_title(f"M = {m}\n$J \simeq {err}\%$", fontsize = 14)
+	
+	im_r += 1 #subplot row
+plt.tight_layout()
+
+### TEST FACE RECONSTRUCTION EXAMPLE___________________________________________	
+FI = x_test - meanface
+w_test = np.dot(FI[:,2].T, np.real(U)) #This shoud be a vector N*1
+W_test = np.reshape(w_test,(2576,1))
+m = 300
+partial_face = np.dot(np.real(U[:,:m]),W_test[:m,])
+rec_test_face  = partial_face + meanface
+
+_none, axarr = plt.subplots(1, 4)
+
+axarr[0].imshow(np.reshape(np.real(x_test[:,2]),(46,56)).T,cmap = 'gist_gray')
+axarr[0].axis('off')
+axarr[0].set_title("$\mathbf{x}_{test}$", fontsize = 20)
+
+axarr[1].imshow(np.reshape(np.real(rec_test_face),(46,56)).T,cmap = 'gist_gray')
+axarr[1].axis('off')
+axarr[1].set_title("$\mathbf{\widetilde{x}}_{test}, M = 300$", fontsize = 20)
+
+axarr[2].imshow(np.reshape(np.real(x_train[:,12]),(46,56)).T,cmap = 'gist_gray')
+axarr[2].axis('off')
+axarr[2].set_title("$\mathbf{x}_{train}$", fontsize = 20)
+
+w_tr = np.dot(x_train[:,12].T, np.real(U)) #This shoud be a vector N*1
+W_tr = np.reshape(w_tr,(2576,1))
+partial_tr_face = np.dot(np.real(U[:,:m]),w_tr[:m,])
+rec_train_face  = partial_tr_face + meanface
+
+axarr[3].imshow(np.reshape(np.real(partial_tr_face),(46,56)).T,cmap = 'gist_gray')
+axarr[3].axis('off')
+axarr[3].set_title("$\mathbf{\widetilde{x}}_{train}, M = 300$", fontsize = 20)
+
+plt.tight_layout()
+#______________________________________________________________________________
