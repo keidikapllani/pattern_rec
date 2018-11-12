@@ -242,7 +242,7 @@ Us = np.zeros((2576,8,52),float)
 meanface_s = np.zeros((2576,52),float)
 ix = 0
 #For each class
-for c in range(1,52):
+for c in range(0,52):
 	_As = x_train[:,ix:ix+8]
 	ix += 8
 	meanface_s[:,c] = _As.mean(axis = 1)
@@ -255,7 +255,7 @@ for c in range(1,52):
 	
 	
 # Reconstruct a train face to check subspace generation
-_ws = np.dot((x_train[:,5] - meanface_s[:,1]).T, np.real(Us[:,:,1])) #This shoud be a vector N*1
+_ws = np.dot((x_train[:,1] - meanface_s[:,1]).T, np.real(Us[:,:,1])) #This shoud be a vector N*1
 ws = np.reshape(_ws,(8,1))
 
 #Find the weighted combination of eigenfaces
@@ -264,3 +264,84 @@ rec_face_s = np.dot(np.real(Us[:,:,1]),ws) + np.reshape(meanface_s[:,1],(2576,1)
 plt.imshow(np.reshape(np.real(rec_face_s),(46,56)).T,cmap = 'gist_gray')	
 
 #!!! Reconstruction error due to mistake in code somewhere
+
+# MINIMUM RECONSTRUCTION ERROR CLASSIFIER
+m = 8
+Js_test = np.zeros((52,104))
+for c in range(0,52):
+	#Remove the meanface
+	Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
+	#Create the projection vectors
+	ws_test = np.dot(Phi_s.T, np.real(Us[:,:,c])).T
+	#Reconstruct test set using m = 8 PCs
+	recon_test_s = np.dot(np.real(Us[:,:,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
+	#Test reconstruction error for each face
+	for i in range(0,104):
+		Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])
+
+#Classifier to minimise the reconstruction error
+y_subs = np.argmin(Js_test,axis = 0) +1
+#Overall accuracy
+accuracy_s = 100*accuracy_score(y_test.T, y_subs)
+
+#Confusion matrix
+
+
+		
+plt.imshow(Js_test,aspect = 'auto')
+cb = plt.colorbar()
+
+def scale_linear_bycolumn(rawpoints, high=100.0, low=0.0):
+    mins = np.min(rawpoints, axis=0)
+    maxs = np.max(rawpoints, axis=0)
+    rng = maxs - mins
+    return high - (((high - low) * (maxs - rawpoints)) / rng)
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=True,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be removed by setting `normalize=False`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+
+
+# Compute confusion matrix
+cnf_matrix = confusion_matrix(y_test.T, y_subs)
+np.set_printoptions(precision=2)
+
+# Plot non-normalized confusion matrix
+plt.figure()
+plot_confusion_matrix(cnf_matrix, classes=class_names,
+                      title='Confusion matrix, without normalization')
+
+# Plot normalized confusion matrix
+plt.figure()
+plot_confusion_matrix(cnf_matrix, classes=[i for i in range(1,53)], normalize=True,
+                      title='Normalized confusion matrix')
