@@ -267,7 +267,8 @@ plt.imshow(np.reshape(np.real(rec_face_s),(46,56)).T,cmap = 'gist_gray')
 
 # MINIMUM RECONSTRUCTION ERROR CLASSIFIER
 m = 8
-Js_test = np.zeros((52,104))
+N_t = 104
+Js_test = np.zeros((52,N_t))
 for c in range(0,52):
 	#Remove the meanface
 	Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
@@ -276,18 +277,17 @@ for c in range(0,52):
 	#Reconstruct test set using m = 8 PCs
 	recon_test_s = np.dot(np.real(Us[:,:,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
 	#Test reconstruction error for each face
-	for i in range(0,104):
+	for i in range(0,N_t):
 		Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])
 
 #Classifier to minimise the reconstruction error
 y_subs = np.argmin(Js_test,axis = 0) +1
 #Overall accuracy
-accuracy_s = 100*accuracy_score(y_test.T, y_subs)
+accuracy_s = 100*accuracy_score(y_train.T, y_subs)
+
 
 #Confusion matrix
-
-
-		
+	
 plt.imshow(Js_test,aspect = 'auto')
 cb = plt.colorbar()
 
