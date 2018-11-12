@@ -237,8 +237,30 @@ plt.title('KNN Classifier accuracy\nas function of the hyperparameters'
 
 
 ### RECOGNITION WITH MINIMUM SUBSPACE RECONSTRUCTION ERROR ###_________________
-
+#Initialise variables
+Us = np.zeros((2576,8,52),float)
+meanface_s = np.zeros((2576,52),float)
+ix = 0
 #For each class
-for c in range(1,53):
-	#Create a subspace
+for c in range(1,52):
+	_As = x_train[:,ix:ix+8]
+	ix += 8
+	meanface_s[:,c] = _As.mean(axis = 1)
+	As = _As - np.reshape(meanface_s[:,c],(2576,1))
 	
+	Ss = (1 / 8) * np.dot(As.T, As) #Returns a N*N matrix
+	ls, _vs = np.linalg.eig(Ss)
+	_Us = np.dot(As, _vs)
+	Us[:,:,c] = _Us / np.apply_along_axis(np.linalg.norm, 0, _Us)
+	
+	
+# Reconstruct a train face to check subspace generation
+_ws = np.dot((x_train[:,5] - meanface_s[:,1]).T, np.real(Us[:,:,1])) #This shoud be a vector N*1
+ws = np.reshape(_ws,(8,1))
+
+#Find the weighted combination of eigenfaces
+rec_face_s = np.dot(np.real(Us[:,:,1]),ws) + np.reshape(meanface_s[:,1],(2576,1))
+
+plt.imshow(np.reshape(np.real(rec_face_s),(46,56)).T,cmap = 'gist_gray')	
+
+#!!! Reconstruction error due to mistake in code somewhere
