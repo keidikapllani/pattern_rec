@@ -57,4 +57,39 @@ for ix_splitter in range(n_people):
     ix = ix + 2
 	
 ###_____________________________ START LDA ____________________________________
-	
+N = 416
+D = 2576
+c = 52	
+M = c - 1
+#1. Compute the global mean
+m = x_train.mean(axis = 1).reshape((2576,1))
+
+#2. Compute the mean of each class mi
+#3. Compute Sw = x - mi, which has rank(Sw) = N - c
+mi = np.zeros((2576,52))
+Sw = np.zeros((2576,416))
+_ix = 0
+for c in range(0,52):
+	mi[:,c] = x_train[:,_ix:_ix+8].mean(axis = 1)
+	Sw[:,_ix:_ix+8] = x_train[:,_ix:_ix+8] - mi[:,c].reshape(2576,1)
+	_ix += 8
+np.linalg.matrix_rank(Sw) #Sanity check
+
+#4. Compute Sb = mi - m, it has rank(c-1)
+Sb = mi - m
+np.linalg.matrix_rank(Sb) #Sanity check
+
+#5. Perform PCA for dimensionality reduction using M = c - 1
+A_pca = x_train - m
+S_pca = (1 / N) * np.dot(A_pca.T, A_pca) #Returns a N*N matrix
+print('dim S_pca = ', S_pca.shape)
+l_pca, v_pca = np.linalg.eig(S_pca)
+_U = np.dot(A_pca, v_pca)
+U_pca = _U / np.apply_along_axis(np.linalg.norm, 0, _U) #normalise each eigenvector
+print('dim ue = ',U_pca.shape)
+W_pca = U_pca[:,:M+1]
+#W_pca = np.dot(A_pca.T, np.real(U_pca[:,:M+1])).T
+
+#6. Find generalised eigenvals of (W_pca.T*Sw*W_pca)**-1(W_pca.T*Sb*W_pca)
+_top = np.dot(W_pca.T,np.dot(Sb,W_pca))
+_top = np.dot(np.dot(W_pca.T,Sb),W_pca)
