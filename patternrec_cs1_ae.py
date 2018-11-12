@@ -79,12 +79,7 @@ wn, U = np.linalg.eig(S)
 print('dim u = ', U.shape)
 # ->   Here we find D eigenval and eigenvectors, however only N are non zero 
 
-<<<<<<< HEAD
-
-### 3. Efficient PCA ###
-=======
 ### PCA WITH SVD OPTIMISATION__________________________________________________
->>>>>>> a7466873d7404eae934c406e5ead970838cb5257
 Se = (1 / N) * np.dot(A.T, A) #Returns a N*N matrix
 print('dim Se = ', Se.shape)
 
@@ -152,16 +147,6 @@ J_train = np.zeros((416,416),float)
 J_test  = np.zeros((416,104),float)
 eigsum 	= sum(w_n) #Total sum of the eigenvalues
 
-<<<<<<< HEAD
-axarr[2].imshow(np.reshape(np.real(x_train[:,12]),(46,56)).T,cmap = 'gist_gray')
-axarr[2].axis('off')
-axarr[2].set_title("$\mathbf{x}_{train}$", fontsize = 20)
-
-w_tr = np.dot(x_train[:,12].T, np.real(U)) #This shoud be a vector N*1
-W_tr = np.reshape(w_tr,(2576,1))
-partial_tr_face = np.dot(np.real(U[:,:m]),w_tr[:m,])
-rec_train_face  = partial_tr_face + meanface
-=======
 #Vary M from 0 to N
 for m in range(0,416):
 	#Reconstruct train set using m PCs
@@ -193,12 +178,7 @@ plt.legend(['Theoretical', 'Training set', 'Test set'], fontsize = 14)
 plt.tight_layout()
 		
 ### RECOGNITION WITH NN ###____________________________________________________
->>>>>>> a7466873d7404eae934c406e5ead970838cb5257
 
 
-<<<<<<< HEAD
-plt.tight_layout()
-=======
 
 ### RECOGNITION WITH MINIMUM SUBSPACE RECONSTRUCTION ERROR ###_________________
->>>>>>> a7466873d7404eae934c406e5ead970838cb5257
