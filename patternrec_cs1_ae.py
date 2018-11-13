@@ -13,6 +13,8 @@ from numpy import linalg as LA
 from sklearn.neighbors import KNeighborsClassifier  
 from sklearn.metrics import classification_report,accuracy_score,confusion_matrix
 import time
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+
 
 ### Load data
 mat_content = sio.loadmat('face.mat')
@@ -111,9 +113,9 @@ for i in range(0,10):
 Ue = np.dot(A,V)
 
 # Plot the first 10 eigenfaces from the efficient PCA
-for i in range(0,10):
-    plt.subplot(2, 5, i+1)
-    plt.imshow(np.reshape(np.real(V[:,i]),(46,56)).T,cmap = 'gist_gray')    
+#for i in range(0,10):
+#    plt.subplot(2, 5, i+1)
+#    plt.imshow(np.reshape(np.real(V[:,i]),(46,56)).T,cmap = 'gist_gray')    
 
 #Reconstruct first face of training
 #rec_face = np.zeros((len(face_data),1), dtype = int) # initialise
@@ -188,7 +190,7 @@ knn_classifier = KNeighborsClassifier(n_neighbors = k)
 knn_classifier.fit(x_train, y_train)
 
 # Classify the test data
-y_pred = classifier.predict(X_test)  
+y_pred = knn_classifier.predict(x_test)  
 
 # Classification metrics
 print(confusion_matrix(y_test, y_pred))  
@@ -345,3 +347,22 @@ plot_confusion_matrix(cnf_matrix, classes=class_names,
 plt.figure()
 plot_confusion_matrix(cnf_matrix, classes=[i for i in range(1,53)], normalize=True,
                       title='Normalized confusion matrix')
+
+#LDA-FDA computation
+
+##Compute class means and global mean.
+#global_mean = face_data.mean(axis=1)
+#
+#class_mean = np.zeros((2576,52),dtype=float)
+#face_data_part = np.zeros((2576,10),dtype=float)
+#for i in range(0,52):
+#    for j in range(0,10):
+#        face_data_part[:,j] = face_data[:,10*i+j]
+#    class_mean[:,i] = face_data_part.mean(axis=1)    
+#    class_mean[:,i] = class_mean[:,i] - global_mean[:]
+#
+#S_b = np.dot(class_mean, class_mean.T)
+
+sklearn_lda = LDA(n_components=2576)
+X_lda_sklearn = sklearn_lda.fit_transform(x_train, y_train)
+
