@@ -12,6 +12,7 @@ import random as rnd
 from numpy import linalg as LA
 from sklearn.neighbors import KNeighborsClassifier  
 from sklearn.metrics import classification_report,accuracy_score,confusion_matrix
+from sklearn.preprocessing import normalize
 import time
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
@@ -81,6 +82,7 @@ print('dim S = ',S.shape)
 
 #Eigenvalues and eigenvectors
 wn, U = np.linalg.eig(S)
+U = np.real(U)
 print('dim u = ', U.shape)
 # ->   Here we find D eigenval and eigenvectors, however only N are non zero 
 
@@ -91,8 +93,9 @@ print('dim Se = ', Se.shape)
 # Calculate eigenvalues `w` and eigenvectors `v`
 we, V = np.linalg.eig(Se)
 # ->   Here we find only the N eigenval and eigenvectors that are non zero
-_U = np.dot(A, V)
-Ue = _U / np.apply_along_axis(np.linalg.norm, 0, _U) #normalise each eigenvector
+Unot = np.dot(A, V)
+Ue = Unot/ np.apply_along_axis(np.linalg.norm, 0, Unot) #normalise each eigenvector
+#Ue = normalize(Usss,axis = 0, norm = 'l2')
 print('dim ue = ',Ue.shape)
 
 #Sort the eigenvalues based on their magnitude
@@ -105,12 +108,13 @@ for i in range(0,10):
     plt.imshow(np.reshape(np.real(U[:,i]),(46,56)).T,cmap = 'gist_gray')
     
 # Plot the first 10 eigenfaces from the efficient PCA
+plt.figure()
 for i in range(0,10):
     plt.subplot(2, 5, i+1)
     plt.imshow(np.reshape(np.real(Ue[:,i]),(46,56)).T,cmap = 'gist_gray')
     
 #Apply SVD to eigenvectors of Se to find the eigenvectors of S
-Ue = np.dot(A,V)
+#Ue = np.dot(A,V)
 
 # Plot the first 10 eigenfaces from the efficient PCA
 #for i in range(0,10):
@@ -131,9 +135,9 @@ plt.imshow(np.reshape(np.real(rec_face),(46,56)).T,cmap = 'gist_gray')
 
 ### TRAIN SET RECONSTRUCTION __________________________________________________
 #Determine face projection in the eigenspace
-W_train = np.dot(A.T, np.real(U)).T
+W_train = np.dot(A.T, np.real(Ue)).T
 #Reconstruct
-rec_train_face  = np.dot(np.real(U),W_train) + meanface
+rec_train_face  = np.dot(np.real(Ue),W_train) + meanface
 
 ### TEST FACE RECONSTRUCTION __________________________________________________
 #1.Remove training mean from test image
@@ -142,8 +146,8 @@ rec_train_face  = np.dot(np.real(U),W_train) + meanface
 #4.Group projections in the matrix W
 
 Phi = x_test - meanface
-W_test = np.dot(Phi.T, np.real(U)).T #This shoud be a vector N*1
-rec_test_face = np.dot(np.real(U),W_test) + meanface
+W_test = np.dot(Phi.T, np.real(Ue)).T #This shoud be a vector N*1
+rec_test_face = np.dot(np.real(Ue),W_test) + meanface
 
 ### RECONSTRUCTION ERROR J AS FUNCTION OF M ___________________________________
 #Initialise variables
@@ -155,9 +159,9 @@ eigsum 	= sum(w_n) #Total sum of the eigenvalues
 #Vary M from 0 to N
 for m in range(0,416):
 	#Reconstruct train set using m PCs
-	recon_train = np.dot(np.real(U[:,:m]),W_train[:m,:]) + meanface
+	recon_train = np.dot(np.real(Ue[:,:m]),W_train[:m,:]) + meanface
 	#Reconstruct test set using m PCs
-	recon_test = np.dot(np.real(U[:,:m]),W_test[:m,:]) + meanface
+	recon_test = np.dot(np.real(Ue[:,:m]),W_test[:m,:]) + meanface
 	#Theoretical reconstruction error
 	J_theor[m] = (eigsum - sum(w_n[:m]))**0.5
 	#Train reconstruction error for each face
@@ -181,20 +185,20 @@ plt.title('Reconstruction error \nas function of number of principal components'
 		  , fontsize = 16)
 plt.legend(['Theoretical', 'Training set', 'Test set'], fontsize = 14)
 plt.tight_layout()
-		
+
 ### RECOGNITION WITH NN ###____________________________________________________
 k = 1 # number of neighbors (hyperparameter)
 # Generate KNN classifier
-knn_classifier = KNeighborsClassifier(n_neighbors = k)
-# Train the classifier
-knn_classifier.fit(x_train, y_train)
+#knn_classifier = KNeighborsClassifier(n_neighbors = k)
+## Train the classifier
+#knn_classifier.fit(x_train, y_train)
+#
+## Classify the test data
+#y_pred = knn_classifier.predict(x_test)  
 
-# Classify the test data
-y_pred = knn_classifier.predict(x_test)  
-
-# Classification metrics
-print(confusion_matrix(y_test, y_pred))  
-print(classification_report(y_test, y_pred))
+## Classification metrics
+#print(confusion_matrix(y_test, y_pred))  
+#print(classification_report(y_test, y_pred))
 
 
 ### KNN Classifier accuracy as function of hyperparameters M and K
@@ -210,7 +214,7 @@ for m in range(0,416):
 	recon_test = np.dot(np.real(U[:,:m]),W_test[:m,:]) + meanface
 	t_compression.append([time.time() - _t_comp])
 	# Increment K
-	for k in range(1, 6):
+	for k in range(1, 3):
 		# Train classifier
 		_t_train = time.time()
 		knn = KNeighborsClassifier(n_neighbors = k)
@@ -356,7 +360,7 @@ plot_confusion_matrix(cnf_matrix, classes=[i for i in range(1,53)], normalize=Tr
 #class_mean = np.zeros((2576,52),dtype=float)
 #face_data_part = np.zeros((2576,10),dtype=float)
 #for i in range(0,52):
-#    for j in range(0,10):
+#    for j in range(0,8):
 #        face_data_part[:,j] = face_data[:,10*i+j]
 #    class_mean[:,i] = face_data_part.mean(axis=1)    
 #    class_mean[:,i] = class_mean[:,i] - global_mean[:]
@@ -366,3 +370,8 @@ plot_confusion_matrix(cnf_matrix, classes=[i for i in range(1,53)], normalize=Tr
 sklearn_lda = LDA(n_components=2576)
 X_lda_sklearn = sklearn_lda.fit_transform(x_train, y_train)
 
+plt.figure()
+ix = 0
+for i in range(0,51):
+	plt.scatter(x=U[:,0][ix:ix+8],y=U[:,1][ix:ix+8])
+	ix += 8

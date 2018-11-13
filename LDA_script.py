@@ -66,7 +66,9 @@ m = x_train.mean(axis = 1).reshape((2576,1))
 
 #2. Compute the mean of each class mi
 #3. Compute Sw = sum over c{(x - mi)*(x - mi).T}, rank(Sw) = N - c
+#	Sw is the within class scatter matrix
 #4. Compute Sb = sum over c{(mi - m)*(mi - m).T}, it has rank(c-1)
+#	Sb is the between class scatter matrix
 mi = np.zeros((2576,52))
 Sw = np.zeros((D,D))
 Sb = np.zeros((D,D))
