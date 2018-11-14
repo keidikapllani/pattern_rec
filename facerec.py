@@ -60,35 +60,35 @@ def reconstruct(W, Y, mu=None):
         return np.dot(Y,W.T)
     return np.dot(Y, W.T) + mu
 
-def pca(X, y, num_components=0):
-    [d, n] = X.shape
-    if (num_components <= 0) or (num_components>n):
-        num_components = n
-    mu = X.mean(axis=1).reshape((d,1))
-    
-    X = X - mu
-   
-    C = np.dot(X.T,X)
-    [eigenvalues,eigenvectors] = np.linalg.eigh(C)
-    eigenvectors = np.dot(X,eigenvectors)
-    for i in range(n):
-        eigenvectors[:,i] = eigenvectors[:,i]/np.linalg.norm(eigenvectors[:,i])
-	# or simply perform an economy size decomposition
-	# eigenvectors, eigenvalues, variance = np.linalg.svd(X.T, full_matrices=False)
-	# sort eigenvectors descending by their eigenvalue
-    idx = np.argsort(-eigenvalues)
-    eigenvalues = eigenvalues[idx]
-    eigenvectors = eigenvectors[:,idx]
-	# select only num_components
-    eigenvalues = eigenvalues[0:num_components].copy()
-    eigenvectors = eigenvectors[:,0:num_components].copy()
-    return [eigenvalues, eigenvectors, mu]
+#def pca(X, y, num_components=0):
+#    [d, n] = X.shape
+#    if (num_components <= 0) or (num_components>n):
+#        num_components = n
+#    mu = X.mean(axis=1).reshape((d,1))
+#    
+#    X = X - mu
+#   
+#    C = np.dot(X.T,X)
+#    [eigenvalues,eigenvectors] = np.linalg.eigh(C)
+#    eigenvectors = np.dot(X,eigenvectors)
+#    for i in range(n):
+#        eigenvectors[:,i] = eigenvectors[:,i]/np.linalg.norm(eigenvectors[:,i])
+#	# or simply perform an economy size decomposition
+#	# eigenvectors, eigenvalues, variance = np.linalg.svd(X.T, full_matrices=False)
+#	# sort eigenvectors descending by their eigenvalue
+#    idx = np.argsort(-eigenvalues)
+#    eigenvalues = eigenvalues[idx]
+#    eigenvectors = eigenvectors[:,idx]
+#	# select only num_components
+#    eigenvalues = eigenvalues[0:num_components].copy()
+#    eigenvectors = eigenvectors[:,0:num_components].copy()
+#    return [eigenvalues, eigenvectors, mu]
 
-def pca_ae(X_train, y_train, M):
-	D,N = X_train.shape()
-	mu = X_train.mean(axis = 1).reshape(D,1)
+def pca(X_train, y_train, M):
+	[d,n] = X_train.shape
+	mu = X_train.mean(axis = 1).reshape(d,1)
 	A = X_train - mu
-	Se = (1 / N) * np.dot(A.T, A) #Returns a N*N matrix
+	Se = (1 / n) * np.dot(A.T, A) #Returns a N*N matrix
 	# Calculate eigenvalues `l` and eigenvectors `v`
 	l, V = np.linalg.eig(Se)
 	# Sort eigenvectors according to decreasing magnitude of eigenvalues
@@ -101,20 +101,52 @@ def pca_ae(X_train, y_train, M):
 	W = _W / np.apply_along_axis(np.linalg.norm, 0, _W)
 	return [W, mu]
 			
-def lda(X, y, num_components=0):
+#def lda(X, y, num_components=0):
+#	y = np.asarray(y)
+#	[d,n] = X.shape
+#	c = np.unique(y)
+#	if (num_components <= 0) or (num_components>(len(c)-1)):
+#		num_components = (len(c)-1)
+#	meanTotal = X.mean(axis=1)
+#	Sw = np.zeros((d, d), dtype=np.float32)
+#	Sb = np.zeros((d, d), dtype=np.float32)
+#	for i in c:
+#		Xi = X[:,np.where(y==i)[0]]
+#		meanClass = Xi.mean(axis=1).reshape((2576,1))
+#		Sw = Sw + np.dot((Xi-meanClass), (Xi-meanClass).T)
+#		Sb = Sb + n * np.dot((meanClass - meanTotal), (meanClass - meanTotal).T)
+#	eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(Sw)*Sb)
+#	idx = np.argsort(-eigenvalues.real)
+#	eigenvalues, eigenvectors = eigenvalues[idx], eigenvectors[:,idx]
+#	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
+#	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
+#	return [eigenvalues, eigenvectors]
+
+
+def lda(x_train, y, num_components=0):
+	d,n = x_train.shape
+	mi = np.zeros((d,52))
 	y = np.asarray(y)
-	[n,d] = X.shape
+	[d,n] = x_train.shape
 	c = np.unique(y)
 	if (num_components <= 0) or (num_components>(len(c)-1)):
 		num_components = (len(c)-1)
-	meanTotal = X.mean(axis=0)
+	m = x_train.mean(axis=1).reshape((d,1))
 	Sw = np.zeros((d, d), dtype=np.float32)
 	Sb = np.zeros((d, d), dtype=np.float32)
-	for i in c:
-		Xi = X[np.where(y==i)[0],:]
-		meanClass = Xi.mean(axis=0)
-		Sw = Sw + np.dot((Xi-meanClass).T, (Xi-meanClass))
-		Sb = Sb + n * np.dot((meanClass - meanTotal).T, (meanClass - meanTotal))
+	_ix = 0
+	for c in range(0,52):
+		xi = x_train[:,_ix:_ix+8]
+		#2
+		mi[:,c] = xi.mean(axis = 1)
+		_mi = mi[:,c].reshape((d,1))
+		#3
+		Sw = Sw + np.dot((xi-_mi),(xi-_mi).T)
+		#4
+		Sb = Sb + np.dot((_mi - m),(_mi - m).T)
+		_ix += 8
+	print(f'rank(Sw) = {np.linalg.matrix_rank(Sw)}') #Sanity check, should be N -c 
+	print(f'rank(Sb) = {np.linalg.matrix_rank(Sb)}') #Sanity check, should be c-1
 	eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(Sw)*Sb)
 	idx = np.argsort(-eigenvalues.real)
 	eigenvalues, eigenvectors = eigenvalues[idx], eigenvectors[:,idx]
@@ -124,10 +156,11 @@ def lda(X, y, num_components=0):
 
 def fisherfaces(X,y,num_components=0):
 	y = np.asarray(y)
-	[n,d] = X.shape
+	[d,n] = X.shape
 	c = len(np.unique(y))
-	[eigenvalues_pca, eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
-	[eigenvalues_lda, eigenvectors_lda] = lda(project(eigenvectors_pca, X, mu_pca), y, num_components)
+	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
+	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
+	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
 	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
 	return [eigenvalues_lda, eigenvectors, mu_pca]
 
