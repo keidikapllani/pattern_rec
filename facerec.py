@@ -8,6 +8,7 @@ Created on Wed Nov 14 16:53:18 2018
 import numpy as np
 import scipy.io as sio
 import random as rnd
+import matplotlib.pyplot as plt
 
 
 def load_data():
@@ -82,7 +83,24 @@ def pca(X, y, num_components=0):
     eigenvalues = eigenvalues[0:num_components].copy()
     eigenvectors = eigenvectors[:,0:num_components].copy()
     return [eigenvalues, eigenvectors, mu]
-		
+
+def pca_ae(X_train, y_train, M):
+	D,N = X_train.shape()
+	mu = X_train.mean(axis = 1).reshape(D,1)
+	A = X_train - mu
+	Se = (1 / N) * np.dot(A.T, A) #Returns a N*N matrix
+	# Calculate eigenvalues `l` and eigenvectors `v`
+	l, V = np.linalg.eig(Se)
+	# Sort eigenvectors according to decreasing magnitude of eigenvalues
+	idx = l.real.argsort()[::-1]   
+	l = l[idx]
+	V = V[:,idx]
+	# Rescale eigenvectors
+	_W = np.dot(A, V)
+	# Normalise eigenvectors
+	W = _W / np.apply_along_axis(np.linalg.norm, 0, _W)
+	return [W, mu]
+			
 def lda(X, y, num_components=0):
 	y = np.asarray(y)
 	[n,d] = X.shape

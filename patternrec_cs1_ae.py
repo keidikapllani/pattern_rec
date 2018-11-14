@@ -33,8 +33,8 @@ D, N = x_train.shape
 print(f'The dimensionality D of the data is {D} , while the datapoints N are {N}')
 
 # Calculate mean face
-meanface = face_data.mean(axis=1)
-meanface = np.reshape(meanface,(D,1)) #To correct array shape
+meanface = x_train.mean(axis=1).reshape((D,1))
+
 #Plot the mean face
 plt.imshow(np.reshape(meanface,(46,56)).T,cmap = 'gist_gray')
 plt.title('Mean Face\n')
@@ -156,8 +156,8 @@ plt.tight_layout()
 ### RECOGNITION WITH KNN ###___________________________________________________
 
 # 1. Projection onto subspace
-x_train_pca = np.dot(x_train.T,Ue[:,:100])
-x_test_pca = np.dot(x_test.T,Ue[:,:100])
+x_train_pca = np.dot((x_train-meanface).T,Ue[:,:100])
+x_test_pca = np.dot((x_test-meanface).T,Ue[:,:100])
 # 2. Generate and train KNN classifier
 knn_classifier = KNeighborsClassifier(n_neighbors = 1)
 knn_classifier.fit(x_train_pca, y_train.T)
