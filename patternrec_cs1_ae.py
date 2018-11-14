@@ -250,7 +250,10 @@ plt.title('KNN Classifier accuracy\nas function of the hyperparameters'
 Wsub = np.zeros((2576,8,52),float) 	   #Eigenvector matrices for each class
 meanface_s = np.zeros((2576,52),float) #Meanfaces for each class
 ls = np.zeros((8,52),float)
+
 ix = 0
+# Training time start
+_trt_subs = time.time()
 #For each class
 for c in range(0,52):
 	_As = x_train[:,ix:ix+8] #Class subspace training set
@@ -268,6 +271,8 @@ for c in range(0,52):
 	vs = _vs[:,idx]
 	_Wsub = np.dot(As, vs)
 	Wsub[:,:,c] = _Wsub / np.apply_along_axis(np.linalg.norm, 0, _Wsub)
+# Training time end
+time_train_sub = time.time() - _trt_subs
 	
 #Plot the theoretical subspace reconstruction error____________________________
 sum_ls = ls.sum(axis = 0)
@@ -327,8 +332,13 @@ for mc in range(0,8):
 
 #Plot the mean accuracy vs Mc
 ind = np.arange(len(accuracy_s)) + 1
-plt.plot(ind,accuracy_s)
-
+plt.figure()
+plt.plot(ind,accuracy_s, linewidth=3, color= '#0055ff')
+plt.xlabel('$M_{c}$ ~ Principal components per class', fontsize = 14)
+plt.ylabel('$\%$ Accuracy', fontsize = 14)
+plt.title('Mean accuracy \nas function of number of principal components'
+		  , fontsize = 16)
+plt.tight_layout()
 
 
 
