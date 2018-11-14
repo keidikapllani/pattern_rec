@@ -186,27 +186,21 @@ plt.title('Reconstruction error \nas function of number of principal components'
 plt.legend(['Theoretical', 'Training set', 'Test set'], fontsize = 14)
 plt.tight_layout()
 
-### RECOGNITION WITH NN ###____________________________________________________
-# Projection onto subspace
+### RECOGNITION WITH KNN ###___________________________________________________
+
+# 1. Projection onto subspace
 x_train_pca = np.dot(x_train.T,Ue[:,:100])
 x_test_pca = np.dot(x_test.T,Ue[:,:100])
-k = 1 # number of neighbors (hyperparameter)
-# Generate KNN classifier
+# 2. Generate and train KNN classifier
 knn_classifier = KNeighborsClassifier(n_neighbors = 1)
-# Train the classifier
 knn_classifier.fit(x_train_pca, y_train.T)
 
-# Classify the test data
+# 3. Classify the test data
 y_pred = knn_classifier.predict(x_test_pca)  
 accuracy = 100*accuracy_score(y_test.T, y_pred)
 
 
-## Classification metrics
-#print(confusion_matrix(y_test, y_pred))  
-#print(classification_report(y_test, y_pred))
-
-
-### KNN Classifier accuracy as function of hyperparameters M and K
+### KNN Classifier accuracy as function of hyperparameters M and K ____________
 accuracy = np.zeros((3,416),float)
 t_compression = []
 t_train = np.zeros((3,416),float)
@@ -245,34 +239,69 @@ plt.xlabel('$M$ ~ Number of principal components', fontsize = 14)
 plt.ylabel('$k$ neighbours', fontsize = 14)
 plt.title('KNN Classifier accuracy\nas function of the hyperparameters'
 		  , fontsize = 16)
+
+
 # pct memory usage
 #memory.append(psutil.Process(os.getpid()).memory_percent())
 
 
 ### RECOGNITION WITH MINIMUM SUBSPACE RECONSTRUCTION ERROR ###_________________
 #Initialise variables
-Us = np.zeros((2576,8,52),float)
-meanface_s = np.zeros((2576,52),float)
+Wsub = np.zeros((2576,8,52),float) 	   #Eigenvector matrices for each class
+meanface_s = np.zeros((2576,52),float) #Meanfaces for each class
+ls = np.zeros((8,52),float)
 ix = 0
 #For each class
 for c in range(0,52):
-	_As = x_train[:,ix:ix+8]
+	_As = x_train[:,ix:ix+8] #Class subspace training set
 	ix += 8
-	meanface_s[:,c] = _As.mean(axis = 1)
+	
+	meanface_s[:,c] = _As.mean(axis = 1) #Class mean
 	As = _As - np.reshape(meanface_s[:,c],(2576,1))
 	
-	Ss = (1 / 8) * np.dot(As.T, As) #Returns a N*N matrix
-	ls, _vs = np.linalg.eig(Ss)
-	_Us = np.dot(As, _vs)
-	Us[:,:,c] = _Us / np.apply_along_axis(np.linalg.norm, 0, _Us)
+	#Find subspace eigenvector matrix
+	Ss = (1 / 8) * np.dot(As.T, As) #Returns a Nc*Nc matrix, Nc = 8
+	_ls, _vs = np.linalg.eig(Ss)
+	#Sort the eigenvalues and eigenvectors
+	idx = _ls.real.argsort()[::-1]   
+	ls[:,c] = _ls[idx]
+	vs = _vs[:,idx]
+	_Wsub = np.dot(As, vs)
+	Wsub[:,:,c] = _Wsub / np.apply_along_axis(np.linalg.norm, 0, _Wsub)
 	
-	
+#Plot the theoretical subspace reconstruction error____________________________
+sum_ls = ls.sum(axis = 0)
+pct_ls = 100* ls/sum_ls
+mean_ls  = pct_ls.mean(axis = 1)
+min_ls = pct_ls[:,pct_ls[0,:] == np.min(pct_ls[0,:])]
+max_ls = pct_ls[:,pct_ls[0,:] == np.max(pct_ls[0,:])]
+J_subs = np.zeros((9,),float)
+J_s_min = np.zeros((9,),float)
+J_s_max = np.zeros((9,),float)
+for m in range(0,9):
+	J_subs[m] = 100 - sum(mean_ls[:m])
+	J_s_min[m]= 100 - sum(min_ls[:m])
+	J_s_max[m]= 100 - sum(max_ls[:m])
+
+plt.figure()	
+plt.plot(J_subs, linewidth=3, color= '#0055ff')
+plt.plot(J_s_max, linewidth=3, color= '#00ff00ff')
+plt.plot(J_s_min, linewidth=3, color= '#ff5500')
+plt.xlabel('$M_{c}$ ~ Principal components per class', fontsize = 14)
+plt.ylabel('$J_{\%}$ ~ Reconstruction error', fontsize = 14)
+plt.title('Theoretical subspace reconstruction error \nas function of number of principal components'
+		  , fontsize = 16)
+plt.legend(['Mean', 'Good class','Bad class'], fontsize = 14)
+plt.tight_layout()
+#______________________________________________________________________________
+
+
 # Reconstruct a train face to check subspace generation
-_ws = np.dot((x_train[:,1] - meanface_s[:,1]).T, np.real(Us[:,:,1])) #This shoud be a vector N*1
+_ws = np.dot((x_train[:,1] - meanface_s[:,1]).T, np.real(Wsub[:,:,1])) #This shoud be a vector N*1
 ws = np.reshape(_ws,(8,1))
 
 #Find the weighted combination of eigenfaces
-rec_face_s = np.dot(np.real(Us[:,:,1]),ws) + np.reshape(meanface_s[:,1],(2576,1))
+rec_face_s = np.dot(np.real(Wsub[:,:,1]),ws) + np.reshape(meanface_s[:,1],(2576,1))
 
 plt.imshow(np.reshape(np.real(rec_face_s),(46,56)).T,cmap = 'gist_gray')	
 
@@ -286,9 +315,9 @@ for c in range(0,52):
 	#Remove the meanface
 	Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
 	#Create the projection vectors
-	ws_test = np.dot(Phi_s.T, np.real(Us[:,:,c])).T
+	ws_test = np.dot(Phi_s.T, np.real(Wsub[:,:,c])).T
 	#Reconstruct test set using m = 8 PCs
-	recon_test_s = np.dot(np.real(Us[:,:,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
+	recon_test_s = np.dot(np.real(Wsub[:,:,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
 	#Test reconstruction error for each face
 	for i in range(0,N_t):
 		Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])
