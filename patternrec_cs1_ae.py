@@ -187,14 +187,19 @@ plt.legend(['Theoretical', 'Training set', 'Test set'], fontsize = 14)
 plt.tight_layout()
 
 ### RECOGNITION WITH NN ###____________________________________________________
+# Projection onto subspace
+x_train_pca = np.dot(x_train.T,Ue[:,:100])
+x_test_pca = np.dot(x_test.T,Ue[:,:100])
 k = 1 # number of neighbors (hyperparameter)
 # Generate KNN classifier
-#knn_classifier = KNeighborsClassifier(n_neighbors = k)
-## Train the classifier
-#knn_classifier.fit(x_train, y_train)
-#
-## Classify the test data
-#y_pred = knn_classifier.predict(x_test)  
+knn_classifier = KNeighborsClassifier(n_neighbors = 1)
+# Train the classifier
+knn_classifier.fit(x_train_pca, y_train.T)
+
+# Classify the test data
+y_pred = knn_classifier.predict(x_test_pca)  
+accuracy = 100*accuracy_score(y_test.T, y_pred)
+
 
 ## Classification metrics
 #print(confusion_matrix(y_test, y_pred))  
@@ -202,29 +207,31 @@ k = 1 # number of neighbors (hyperparameter)
 
 
 ### KNN Classifier accuracy as function of hyperparameters M and K
-accuracy = np.zeros((5,416),float)
+accuracy = np.zeros((3,416),float)
 t_compression = []
-t_train = np.zeros((5,416),float)
-t_test = np.zeros((5,416),float)
+t_train = np.zeros((3,416),float)
+t_test = np.zeros((3,416),float)
+
 # Increment M
-for m in range(0,416):
-	#Measure the data compression time
+for m in range(1,416):
+	#Project onto the eigenspace and measure the projection time
 	_t_comp = time.time()
-	#Reconstruct test set using m PCs
-	recon_test = np.dot(np.real(U[:,:m]),W_test[:m,:]) + meanface
+	x_train_pca = np.dot(x_train.T,Ue[:,:m])
+	x_test_pca = np.dot(x_test.T,Ue[:,:m])
 	t_compression.append([time.time() - _t_comp])
+	
 	# Increment K
-	for k in range(1, 3):
+	for k in range(1, 4):
 		# Train classifier
 		_t_train = time.time()
 		knn = KNeighborsClassifier(n_neighbors = k)
-		knn.fit(x_train.T, y_train.T)
+		knn.fit(x_train_pca, y_train.T)
 		# Measure training time
 		t_train[k-1,m] = time.time() - _t_train
 		
 		# Classification of test data
 		_t_test = time.time()
-		y_knn = knn.predict(recon_test.T)
+		y_knn = knn.predict(x_test_pca)
 		accuracy[k-1, m] = 100*accuracy_score(y_test.T, y_knn)
 		# Measure classification time
 		t_test[k-1,m] = time.time() - _t_test
