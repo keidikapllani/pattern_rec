@@ -71,7 +71,33 @@ def pca(X, y, num_components=0):
 	else:
 		C = np.dot(X,X.T)
 		[eigenvalues,eigenvectors] = np.linalg.eigh(C)
-		eigenvectors = np.dot(X.T,eigenvectors)
+		eigenvectors = np.dot(X,eigenvectors)
+		for i in range(n):
+			eigenvectors[:,i] = eigenvectors[:,i]/np.linalg.norm(eigenvectors[:,i])
+	# or simply perform an economy size decomposition
+	# eigenvectors, eigenvalues, variance = np.linalg.svd(X.T, full_matrices=False)
+	# sort eigenvectors descending by their eigenvalue
+	idx = np.argsort(-eigenvalues)
+	eigenvalues = eigenvalues[idx]
+	eigenvectors = eigenvectors[:,idx]
+	# select only num_components
+	eigenvalues = eigenvalues[0:num_components].copy()
+	eigenvectors = eigenvectors[:,0:num_components].copy()
+	return [eigenvalues, eigenvectors, mu]
+
+def pca_anto(X, y, M=0):
+	[n,d] = X.shape
+	if (num_components <= 0) or (num_components>n):
+		num_components = n
+	mu = X.mean(axis=0)
+	X = X - mu
+	if n>d:
+		C = np.dot(X.T,X)
+		[eigenvalues,eigenvectors] = np.linalg.eigh(C)
+	else:
+		C = np.dot(X,X.T)
+		[eigenvalues,eigenvectors] = np.linalg.eigh(C)
+		eigenvectors = np.dot(X,eigenvectors)
 		for i in range(n):
 			eigenvectors[:,i] = eigenvectors[:,i]/np.linalg.norm(eigenvectors[:,i])
 	# or simply perform an economy size decomposition
@@ -130,3 +156,44 @@ def asColumnMatrix(X):
 	for col in X:
 		mat = np.hstack((mat, np.asarray(col).reshape(-1,1)))
 	return mat
+
+
+def scale_linear_bycolumn(rawpoints, high=100.0, low=0.0):
+    mins = np.min(rawpoints, axis=0)
+    maxs = np.max(rawpoints, axis=0)
+    rng = maxs - mins
+    return high - (((high - low) * (maxs - rawpoints)) / rng)
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=True,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be removed by setting `normalize=False`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
