@@ -305,27 +305,33 @@ rec_face_s = np.dot(np.real(Wsub[:,:,1]),ws) + np.reshape(meanface_s[:,1],(2576,
 
 plt.imshow(np.reshape(np.real(rec_face_s),(46,56)).T,cmap = 'gist_gray')	
 
-#!!! Reconstruction error due to mistake in code somewhere
-
-# MINIMUM RECONSTRUCTION ERROR CLASSIFIER
-m = 8
+# MINIMUM RECONSTRUCTION ERROR CLASSIFIER______________________________________
 N_t = 104
-Js_test = np.zeros((52,N_t))
-for c in range(0,52):
-	#Remove the meanface
-	Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
-	#Create the projection vectors
-	ws_test = np.dot(Phi_s.T, np.real(Wsub[:,:,c])).T
-	#Reconstruct test set using m = 8 PCs
-	recon_test_s = np.dot(np.real(Wsub[:,:,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
-	#Test reconstruction error for each face
-	for i in range(0,N_t):
-		Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])
+accuracy_s = np.zeros((8,1),float)
+for mc in range(0,8):
+	Js_test = np.zeros((52,N_t))
+	for c in range(0,52):
+		#Remove the meanface
+		Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
+		#Create the projection vectors
+		ws_test = np.dot(Phi_s.T, np.real(Wsub[:,:mc,c])).T
+		#Reconstruct test set using m = 8 PCs
+		recon_test_s = np.dot(np.real(Wsub[:,:mc,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
+		#Test reconstruction error for each face
+		for i in range(0,N_t):
+			Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])	
+	#Classifier to minimise the reconstruction error
+	y_subs = np.argmin(Js_test,axis = 0) +1
+	#Overall accuracy
+	accuracy_s[mc] = 100*accuracy_score(y_test.T, y_subs)
 
-#Classifier to minimise the reconstruction error
-y_subs = np.argmin(Js_test,axis = 0) +1
-#Overall accuracy
-accuracy_s = 100*accuracy_score(y_train.T, y_subs)
+#Plot the mean accuracy vs Mc
+ind = np.arange(len(accuracy_s)) + 1
+plt.plot(ind,accuracy_s)
+
+
+
+
 
 
 #Confusion matrix
