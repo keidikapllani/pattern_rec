@@ -14,6 +14,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report,accuracy_score,confusion_matrix
 from sklearn.preprocessing import normalize
 import time
+import sys
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 
@@ -250,7 +251,10 @@ plt.title('KNN Classifier accuracy\nas function of the hyperparameters'
 Wsub = np.zeros((2576,8,52),float) 	   #Eigenvector matrices for each class
 meanface_s = np.zeros((2576,52),float) #Meanfaces for each class
 ls = np.zeros((8,52),float)
+
 ix = 0
+# Training time start
+_trt_subs = time.time()
 #For each class
 for c in range(0,52):
 	_As = x_train[:,ix:ix+8] #Class subspace training set
@@ -268,6 +272,8 @@ for c in range(0,52):
 	vs = _vs[:,idx]
 	_Wsub = np.dot(As, vs)
 	Wsub[:,:,c] = _Wsub / np.apply_along_axis(np.linalg.norm, 0, _Wsub)
+# Training time end
+time_train_sub = time.time() - _trt_subs
 	
 #Plot the theoretical subspace reconstruction error____________________________
 sum_ls = ls.sum(axis = 0)
@@ -308,31 +314,70 @@ plt.imshow(np.reshape(np.real(rec_face_s),(46,56)).T,cmap = 'gist_gray')
 # MINIMUM RECONSTRUCTION ERROR CLASSIFIER______________________________________
 N_t = 104
 accuracy_s = np.zeros((8,1),float)
-for mc in range(0,8):
-	Js_test = np.zeros((52,N_t))
-	for c in range(0,52):
-		#Remove the meanface
-		Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
-		#Create the projection vectors
-		ws_test = np.dot(Phi_s.T, np.real(Wsub[:,:mc,c])).T
-		#Reconstruct test set using m = 8 PCs
-		recon_test_s = np.dot(np.real(Wsub[:,:mc,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
-		#Test reconstruction error for each face
-		for i in range(0,N_t):
-			Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])	
-	#Classifier to minimise the reconstruction error
-	y_subs = np.argmin(Js_test,axis = 0) +1
-	#Overall accuracy
-	accuracy_s[mc] = 100*accuracy_score(y_test.T, y_subs)
-
+time_test_sub = np.zeros((8,100))
+mem = []
+for time_test in range(0,10):
+	import os,psutil
+	
+	for mc in range(0,8):
+		memory = []
+		# Test time start
+		_tst_sub = time.time()
+		Js_test = np.zeros((52,N_t))
+		for c in range(0,52):
+			#Remove the meanface
+			Phi_s = x_test - np.reshape(meanface_s[:,c],(2576,1))
+			#Create the projection vectors
+			ws_test = np.dot(Phi_s.T, np.real(Wsub[:,:mc,c])).T
+			#Reconstruct test set using m = 8 PCs
+			recon_test_s = np.dot(np.real(Wsub[:,:mc,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(2576,1))
+			#Test reconstruction error for each face
+			for i in range(0,N_t):
+				Js_test[c,i] = LA.norm(x_test[:,i] - recon_test_s[:,i])	
+		#Classifier to minimise the reconstruction error
+		y_subs = np.argmin(Js_test,axis = 0) +1
+		# Test time end
+		time_test_sub[mc,time_test] = time.time() - _tst_sub
+		#Overall accuracy
+		accuracy_s[mc] = 100*accuracy_score(y_test.T, y_subs)
+		memory.append(psutil.Process(os.getpid()).memory_percent())
+	mem += memory
+		
 #Plot the mean accuracy vs Mc
 ind = np.arange(len(accuracy_s)) + 1
-plt.plot(ind,accuracy_s)
+plt.figure()
+plt.plot(ind,accuracy_s, linewidth=3, color= '#0055ff')
+plt.xlabel('$M_{c}$ ~ Principal components per class', fontsize = 14)
+plt.ylabel('$\%$ Accuracy', fontsize = 14)
+plt.title('Mean accuracy \nas function of number of principal components'
+		  , fontsize = 16)
+plt.tight_layout()
+
+#Plot the average test time vs Mc relationship
+mean_test_time = time_test_sub.mean(axis = 1)
+mean_memory = mem/10
+
+fig, ax1 = plt.subplots()
+ax1.plot(ind, mean_test_time, 'b-')
+ax1.set_xlabel('$M_{c}$ ~ In-class principal components used')
+
+# Make the y-axis label, ticks and tick labels match the line color.
+ax1.set_ylabel('Mean test time', color='b')
+ax1.tick_params('y', colors='b')
+
+ax2 = ax1.twinx()
+s2 = np.sin(2 * np.pi * t)
+ax2.plot(t, s2, 'r.')
+ax2.set_ylabel('sin', color='r')
+ax2.tick_params('y', colors='r')
+
+fig.tight_layout()
+plt.show()
 
 
-
-
-
+import os,psutil
+memory = []
+memory.append(psutil.Process(os.getpid()).memory_percent())
 
 #Confusion matrix
 	
