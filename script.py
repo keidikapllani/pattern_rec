@@ -23,6 +23,7 @@ x_train, y_train, x_test, y_test = load_data()
 x_train_proj = project(x_train, W, mu)
 x_test_proj = project(x_test, W, mu)
 
+plt.imshow(W[:,50].reshape(46,56).T, cmap = 'gist_gray')
 #
 
 #x_train_pca = np.dot(x_train.T,Ue[:,:100])
