@@ -17,11 +17,19 @@ import numpy as np
 
 x_train, y_train, x_test, y_test = load_data()
 [d,n] = x_train.shape
+<<<<<<< HEAD
+[eigenvalues_lda, W] = lda(x_train, y_train, 0)
+#[D, W, mu] = fisherfaces(x_train.T, y_train)
+#[eigenvalues_pca, W, mu_pca] = pca(x_train, y_train, (n-52))
+#x_train_proj = project(x_train, W, 0)
+#x_test_proj = project(x_test, W, 0)
+=======
 #[eigenvalues_lda, W] = lda(x_train.T, y_train.T, 0)
 [D, W, mu] = fisherfaces(x_train, y_train)
 #[W, mu_pca] = pca_ae(x_train, y_train, (n-52))
 x_train_proj = project(x_train, W, mu)
 x_test_proj = project(x_test, W, mu)
+>>>>>>> e7e8eb998d94cae918f2c6dfa94ef038c0e014a0
 
 plt.imshow(W[:,50].reshape(46,56).T, cmap = 'gist_gray')
 #

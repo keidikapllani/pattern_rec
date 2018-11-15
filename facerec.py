@@ -61,6 +61,9 @@ def reconstruct(W, Y, mu=None):
     return np.dot(Y, W.T) + mu
 
 
+
+
+
 def pca(X_train, y_train, M):
 	[d,n] = X_train.shape
 	mu = X_train.mean(axis = 1).reshape(d,1)
@@ -112,13 +115,16 @@ def lda(x_train, y, num_components=0):
 	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
 	return [eigenvalues, eigenvectors]
 
+
 def fisherfaces(X,y,num_components=0):
 	y = np.asarray(y)
 	[d,n] = X.shape
 	c = len(np.unique(y))
+
 	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
 	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
 	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
+
 	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
 	return [eigenvalues_lda, eigenvectors, mu_pca]
 
