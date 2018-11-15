@@ -11,25 +11,18 @@ Created on Wed Nov 14 16:58:59 2018
 #sys.path.append("..")
 
 from facerec import lda, pca, load_data, fisherfaces, project
-from sklearn.neighbors import KNeighborsClassifier  
-from sklearn.metrics import classification_report,accuracy_score,confusion_matrix
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import VotingClassifier  
 import numpy as np
 
 x_train, y_train, x_test, y_test = load_data()
 [d,n] = x_train.shape
-<<<<<<< HEAD
-[eigenvalues_lda, W] = lda(x_train, y_train, 0)
-#[D, W, mu] = fisherfaces(x_train.T, y_train)
-#[eigenvalues_pca, W, mu_pca] = pca(x_train, y_train, (n-52))
-#x_train_proj = project(x_train, W, 0)
-#x_test_proj = project(x_test, W, 0)
-=======
 #[eigenvalues_lda, W] = lda(x_train.T, y_train.T, 0)
 [D, W, mu] = fisherfaces(x_train, y_train)
 #[W, mu_pca] = pca_ae(x_train, y_train, (n-52))
 x_train_proj = project(x_train, W, mu)
 x_test_proj = project(x_test, W, mu)
->>>>>>> e7e8eb998d94cae918f2c6dfa94ef038c0e014a0
 
 #
 
@@ -42,3 +35,10 @@ x_test_proj = project(x_test, W, mu)
 # 3. Classify the test data
 #y_pred = knn_classifier.predict(x_test_pca)  
 #accuracy = 100*accuracy_score(y_test.T, y_pred)
+
+# PCA-LDA Ensemble 
+
+#bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=1.0, max_features=1.0, bootstrap_features = True)
+#bagging.fit(x_train.T,y_train.T)
+#samples = bagging.estimators_features_
+#samples = bagging.estimators_samples_
