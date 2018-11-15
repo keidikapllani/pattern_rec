@@ -16,46 +16,12 @@ from sklearn.preprocessing import normalize
 import time
 import sys
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+import os,psutil
+from facerec import *
 
 
 ### Load data
-mat_content = sio.loadmat('face.mat')
-face_data = mat_content['X']
-out_data = mat_content['l']
-
-### Split train and test data
-pt_train = 8
-pt_test = 2
-
-n_people = 52
-face_range = list(range(0,10,1))
-
-#Initialise train and test matrices
-n_train = int(face_data.shape[1]*pt_train/10)
-n_test  = int(face_data.shape[1]*pt_test/10)
-x_test  = np.zeros((len(face_data),n_test), dtype = int)
-#x_train = np.zeros((len(face_data),n_train), dtype = int)
-y_test  = np.zeros((len(out_data),n_test), dtype = int)
-#y_train = np.zeros((len(out_data),n_train), dtype = int)
-x_train = face_data
-y_train = out_data
-#Initialise counter to build output matrices
-ix = 0
-ix2= 0
-#for each person split data
-for ix_splitter in range(n_people):
-    #generate random indexes within the face range per person
-    rng = list(range(0,10,1))
-    indx = rnd.sample(rng,pt_test)
-    r = [indx[i] + ix_splitter*10 for i in range(len(indx))]
-    x_test[:,[ix, ix+1]] = face_data[:,r]
-    y_test[:,[ix, ix+1]] = out_data[:,r]   
-    x_train = np.delete(x_train,r[0]-ix,1)
-    x_train = np.delete(x_train,r[1]-ix,1)
-    y_train = np.delete(y_train,r[0]-ix,1)
-    y_train = np.delete(y_train,r[1]-ix,1)
-    
-    ix = ix + 2
+x_train,y_train,x_test,y_test = load_data()
     
 #______________________________ Start PCA _____________________________________
 #______________________________________________________________________________
@@ -67,8 +33,8 @@ D, N = x_train.shape
 print(f'The dimensionality D of the data is {D} , while the datapoints N are {N}')
 
 # Calculate mean face
-meanface = face_data.mean(axis=1)
-meanface = np.reshape(meanface,(D,1)) #To correct array shape
+meanface = x_train.mean(axis=1).reshape((D,1))
+
 #Plot the mean face
 plt.imshow(np.reshape(meanface,(46,56)).T,cmap = 'gist_gray')
 plt.title('Mean Face\n')
@@ -190,8 +156,8 @@ plt.tight_layout()
 ### RECOGNITION WITH KNN ###___________________________________________________
 
 # 1. Projection onto subspace
-x_train_pca = np.dot(x_train.T,Ue[:,:100])
-x_test_pca = np.dot(x_test.T,Ue[:,:100])
+x_train_pca = np.dot((x_train-meanface).T,Ue[:,:100])
+x_test_pca = np.dot((x_test-meanface).T,Ue[:,:100])
 # 2. Generate and train KNN classifier
 knn_classifier = KNeighborsClassifier(n_neighbors = 1)
 knn_classifier.fit(x_train_pca, y_train.T)
@@ -317,7 +283,6 @@ accuracy_s = np.zeros((8,1),float)
 time_test_sub = np.zeros((8,100))
 mem = []
 for time_test in range(0,10):
-	import os,psutil
 	
 	for mc in range(0,8):
 		memory = []
@@ -353,77 +318,27 @@ plt.title('Mean accuracy \nas function of number of principal components'
 		  , fontsize = 16)
 plt.tight_layout()
 
-#Plot the average test time vs Mc relationship
+#Plot the average test time vs Mc relationship ________________________________
 mean_test_time = time_test_sub.mean(axis = 1)
 mean_memory = mem/10
 
 fig, ax1 = plt.subplots()
 ax1.plot(ind, mean_test_time, 'b-')
-ax1.set_xlabel('$M_{c}$ ~ In-class principal components used')
-
-# Make the y-axis label, ticks and tick labels match the line color.
-ax1.set_ylabel('Mean test time', color='b')
+ax1.set_xlabel('$M_{c}$ ~ In-class principal components used', fontsize = 14)
+ax1.set_ylabel('Mean test time', color='b', fontsize = 14)
 ax1.tick_params('y', colors='b')
-
 ax2 = ax1.twinx()
-s2 = np.sin(2 * np.pi * t)
-ax2.plot(t, s2, 'r.')
-ax2.set_ylabel('sin', color='r')
+ax2.plot(ind, mem[:8], 'r.')
+ax2.set_ylabel('Memory usage', color='r', fontsize = 14)
 ax2.tick_params('y', colors='r')
-
 fig.tight_layout()
-plt.show()
+#______________________________________________________________________________
 
-
-import os,psutil
-memory = []
-memory.append(psutil.Process(os.getpid()).memory_percent())
 
 #Confusion matrix
 	
 plt.imshow(Js_test,aspect = 'auto')
 cb = plt.colorbar()
-
-def scale_linear_bycolumn(rawpoints, high=100.0, low=0.0):
-    mins = np.min(rawpoints, axis=0)
-    maxs = np.max(rawpoints, axis=0)
-    rng = maxs - mins
-    return high - (((high - low) * (maxs - rawpoints)) / rng)
-
-def plot_confusion_matrix(cm, classes,
-                          normalize=True,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be removed by setting `normalize=False`.
-    """
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
-    else:
-        print('Confusion matrix, without normalization')
-
-    print(cm)
-
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, format(cm[i, j], fmt),
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-    plt.tight_layout()
-
 
 # Compute confusion matrix
 cnf_matrix = confusion_matrix(y_test.T, y_subs)
@@ -438,27 +353,3 @@ plot_confusion_matrix(cnf_matrix, classes=class_names,
 plt.figure()
 plot_confusion_matrix(cnf_matrix, classes=[i for i in range(1,53)], normalize=True,
                       title='Normalized confusion matrix')
-
-#LDA-FDA computation
-
-##Compute class means and global mean.
-#global_mean = face_data.mean(axis=1)
-#
-#class_mean = np.zeros((2576,52),dtype=float)
-#face_data_part = np.zeros((2576,10),dtype=float)
-#for i in range(0,52):
-#    for j in range(0,8):
-#        face_data_part[:,j] = face_data[:,10*i+j]
-#    class_mean[:,i] = face_data_part.mean(axis=1)    
-#    class_mean[:,i] = class_mean[:,i] - global_mean[:]
-#
-#S_b = np.dot(class_mean, class_mean.T)
-
-sklearn_lda = LDA(n_components=2576)
-X_lda_sklearn = sklearn_lda.fit_transform(x_train, y_train)
-
-plt.figure()
-ix = 0
-for i in range(0,51):
-	plt.scatter(x=U[:,0][ix:ix+8],y=U[:,1][ix:ix+8])
-	ix += 8
