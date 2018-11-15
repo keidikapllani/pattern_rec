@@ -53,13 +53,14 @@ def load_data():
 def project(W, X, mu=None):
 	if mu is None:
 		return np.dot(X.T,W)
-	return np.dot((X - mu), W)
+	return np.dot((X - mu).T, W)
 
 def reconstruct(W, Y, mu=None):
     if mu is None:
         return np.dot(Y,W.T)
     return np.dot(Y, W.T) + mu
 
+<<<<<<< HEAD
 #def pca(X, y, num_components=0):
 #    [d, n] = X.shape
 #    if (num_components <= 0) or (num_components>n):
@@ -83,6 +84,11 @@ def reconstruct(W, Y, mu=None):
 #    eigenvalues = eigenvalues[0:num_components].copy()
 #    eigenvectors = eigenvectors[:,0:num_components].copy()
 #    return [eigenvalues, eigenvectors, mu]
+=======
+
+
+
+>>>>>>> 62ff3a9caaccf36d3ece424bde2d53d56a7a54ea
 
 def pca(X_train, y_train, M):
 	[d,n] = X_train.shape
@@ -101,26 +107,7 @@ def pca(X_train, y_train, M):
 	W = _W / np.apply_along_axis(np.linalg.norm, 0, _W)
 	return [W, mu]
 			
-#def lda(X, y, num_components=0):
-#	y = np.asarray(y)
-#	[d,n] = X.shape
-#	c = np.unique(y)
-#	if (num_components <= 0) or (num_components>(len(c)-1)):
-#		num_components = (len(c)-1)
-#	meanTotal = X.mean(axis=1)
-#	Sw = np.zeros((d, d), dtype=np.float32)
-#	Sb = np.zeros((d, d), dtype=np.float32)
-#	for i in c:
-#		Xi = X[:,np.where(y==i)[0]]
-#		meanClass = Xi.mean(axis=1).reshape((2576,1))
-#		Sw = Sw + np.dot((Xi-meanClass), (Xi-meanClass).T)
-#		Sb = Sb + n * np.dot((meanClass - meanTotal), (meanClass - meanTotal).T)
-#	eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(Sw)*Sb)
-#	idx = np.argsort(-eigenvalues.real)
-#	eigenvalues, eigenvectors = eigenvalues[idx], eigenvectors[:,idx]
-#	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
-#	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
-#	return [eigenvalues, eigenvectors]
+
 
 
 def lda(x_train, y, num_components=0):
@@ -153,14 +140,30 @@ def lda(x_train, y, num_components=0):
 	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
 	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
 	return [eigenvalues, eigenvectors]
+<<<<<<< HEAD
+=======
+
+>>>>>>> 62ff3a9caaccf36d3ece424bde2d53d56a7a54ea
 
 def fisherfaces(X,y,num_components=0):
 	y = np.asarray(y)
 	[d,n] = X.shape
 	c = len(np.unique(y))
+<<<<<<< HEAD
 	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
 	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
 	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
 	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
 	return [eigenvalues_lda, eigenvectors, mu_pca]
 
+=======
+
+	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
+	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
+	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
+
+	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
+	return [eigenvalues_lda, eigenvectors, mu_pca]
+
+
+>>>>>>> 62ff3a9caaccf36d3ece424bde2d53d56a7a54ea
