@@ -60,35 +60,9 @@ def reconstruct(W, Y, mu=None):
         return np.dot(Y,W.T)
     return np.dot(Y, W.T) + mu
 
-<<<<<<< HEAD
-#def pca(X, y, num_components=0):
-#    [d, n] = X.shape
-#    if (num_components <= 0) or (num_components>n):
-#        num_components = n
-#    mu = X.mean(axis=1).reshape((d,1))
-#    
-#    X = X - mu
-#   
-#    C = np.dot(X.T,X)
-#    [eigenvalues,eigenvectors] = np.linalg.eigh(C)
-#    eigenvectors = np.dot(X,eigenvectors)
-#    for i in range(n):
-#        eigenvectors[:,i] = eigenvectors[:,i]/np.linalg.norm(eigenvectors[:,i])
-#	# or simply perform an economy size decomposition
-#	# eigenvectors, eigenvalues, variance = np.linalg.svd(X.T, full_matrices=False)
-#	# sort eigenvectors descending by their eigenvalue
-#    idx = np.argsort(-eigenvalues)
-#    eigenvalues = eigenvalues[idx]
-#    eigenvectors = eigenvectors[:,idx]
-#	# select only num_components
-#    eigenvalues = eigenvalues[0:num_components].copy()
-#    eigenvectors = eigenvectors[:,0:num_components].copy()
-#    return [eigenvalues, eigenvectors, mu]
-=======
 
 
 
->>>>>>> 62ff3a9caaccf36d3ece424bde2d53d56a7a54ea
 
 def pca(X_train, y_train, M):
 	[d,n] = X_train.shape
@@ -119,8 +93,8 @@ def lda(x_train, y, num_components=0):
 	if (num_components <= 0) or (num_components>(len(c)-1)):
 		num_components = (len(c)-1)
 	m = x_train.mean(axis=1).reshape((d,1))
-	Sw = np.zeros((d, d), dtype=np.float32)
-	Sb = np.zeros((d, d), dtype=np.float32)
+	Sw = np.zeros((d, d), dtype=np.float64)
+	Sb = np.zeros((d, d), dtype=np.float64)
 	_ix = 0
 	for c in range(0,52):
 		xi = x_train[:,_ix:_ix+8]
@@ -140,30 +114,14 @@ def lda(x_train, y, num_components=0):
 	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
 	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
 	return [eigenvalues, eigenvectors]
-<<<<<<< HEAD
-=======
-
->>>>>>> 62ff3a9caaccf36d3ece424bde2d53d56a7a54ea
 
 def fisherfaces(X,y,num_components=0):
 	y = np.asarray(y)
 	[d,n] = X.shape
 	c = len(np.unique(y))
-<<<<<<< HEAD
 	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
 	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
 	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
 	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
 	return [eigenvalues_lda, eigenvectors, mu_pca]
 
-=======
-
-	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
-	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
-	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
-
-	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
-	return [eigenvalues_lda, eigenvectors, mu_pca]
-
-
->>>>>>> 62ff3a9caaccf36d3ece424bde2d53d56a7a54ea

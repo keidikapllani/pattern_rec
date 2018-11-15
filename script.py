@@ -14,17 +14,18 @@ from facerec import lda, pca, load_data, fisherfaces, project
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import VotingClassifier  
+from sklearn.utils import resample
 import numpy as np
 
 x_train, y_train, x_test, y_test = load_data()
 [d,n] = x_train.shape
 #[eigenvalues_lda, W] = lda(x_train.T, y_train.T, 0)
-[D, W, mu] = fisherfaces(x_train, y_train)
-#[W, mu_pca] = pca_ae(x_train, y_train, (n-52))
-x_train_proj = project(x_train, W, mu)
-x_test_proj = project(x_test, W, mu)
+#[D, W, mu] = fisherfaces(x_train, y_train)
+[W, mu_pca] = pca(x_train, y_train, (n-52))
+x_train_proj = project(x_train, W, mu_pca)
+#x_test_proj = project(x_test, W, mu)
 
-plt.imshow(W[:,50].reshape(46,56).T, cmap = 'gist_gray')
+#plt.imshow(W[:,50].reshape(46,56).T, cmap = 'gist_gray')
 #
 
 #x_train_pca = np.dot(x_train.T,Ue[:,:100])
@@ -38,8 +39,11 @@ plt.imshow(W[:,50].reshape(46,56).T, cmap = 'gist_gray')
 #accuracy = 100*accuracy_score(y_test.T, y_pred)
 
 # PCA-LDA Ensemble 
-
+bootstrap_size = int(0.5*len(x_train_proj))
 #bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=1.0, max_features=1.0, bootstrap_features = True)
 #bagging.fit(x_train.T,y_train.T)
 #samples = bagging.estimators_features_
 #samples = bagging.estimators_samples_
+x_bag, y_bag = resample(x_train_proj, y_train.T, n_samples = bootstrap_size , replace = True)
+y_bag = y_bag.T
+[eigenvalues_lda, W] = lda(x_bag,y_bag, 0)
