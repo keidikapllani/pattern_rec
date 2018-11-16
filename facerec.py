@@ -151,7 +151,7 @@ def lda(x_train, y, num_components=0):
 	eigenvalues, eigenvectors = eigenvalues[idx], eigenvectors[:,idx]
 	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
 	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
-	return [eigenvalues, eigenvectors]
+	return  eigenvectors
 
 def fisherfaces(X,y,num_components=0):
 	y = np.asarray(y)
@@ -163,3 +163,68 @@ def fisherfaces(X,y,num_components=0):
 	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
 	return [eigenvalues_lda, eigenvectors, mu_pca]
 
+def resample_w_pca(W,n0,k):
+	d,n = W.shape
+#	W0 = W[:,:n0]
+	nrange = range(50,300,1)
+	rn = rnd.sample(nrange,k)
+	
+	Wk= np.zeros((k,d,n0+max(rn)))
+	for i in range(0,k):
+		#Generate subspaces
+		
+		Wk[:,:,:n0] = W[:,:n0]
+		rng = list(range(n0,n,1))
+		indx = rnd.sample(rng,rn[i])
+		Wk[i,:,n0:n0+rn[i]] = W[:,indx]
+		
+#		Wk[i,:,:] = np.append(W[:,indx])
+	return Wk,[x + n0 for x in rn]
+
+def resample_faces(X,Y,k):
+	d,n = X.shape
+	nrange = range(150,416,1)
+	rn = rnd.sample(nrange,k)
+	X_out= np.zeros((k,d,max(rn)))
+	Y_out = np.zeros((k,max(rn)))
+	for i in range(0,k):
+		rng = list(range(0,n,1))
+		indx = rnd.sample(rng,rn[i])
+		indx.sort()
+		X_out[i,:,:rn[i]] = X[:,indx]
+		Y_out[i,:rn[i]] = Y[0,indx]
+	return X_out,Y_out, rn
+
+def lda_gen(x_train, y, num_components=0):
+	d,n = x_train.shape
+	label = np.unique(y)
+	c = len(label)
+	
+	mi = np.zeros((d,c))
+	y = np.asarray(y)
+	
+	if (num_components <= 0) or (num_components>(c-1)):
+		num_components = (c-1)
+		
+	m = x_train.mean(axis=1).reshape((d,1))
+	Sw = np.zeros((d, d), dtype=np.float64)
+	Sb = np.zeros((d, d), dtype=np.float64)
+	_ix = 0
+	for i in range(0,c):
+		xi = x_train[:,y == label[i]]
+		#2
+		mi[:,i] = xi.mean(axis = 1)
+		_mi = mi[:,i].reshape((d,1))
+		#3
+		Sw = Sw + np.dot((xi-_mi),(xi-_mi).T)
+		#4
+		Sb = Sb + np.dot((_mi - m),(_mi - m).T)
+		_ix += 8
+	print(f'rank(Sw) = {np.linalg.matrix_rank(Sw)}') #Sanity check, should be N -c 
+	print(f'rank(Sb) = {np.linalg.matrix_rank(Sb)}') #Sanity check, should be c-1
+	eigenvalues, eigenvectors = np.linalg.eig(np.linalg.inv(Sw)*Sb)
+	idx = np.argsort(-eigenvalues.real)
+	eigenvalues, eigenvectors = eigenvalues[idx], eigenvectors[:,idx]
+	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
+	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
+	return  eigenvectors
