@@ -11,6 +11,7 @@ import scipy.io as sio
 import random as rnd
 import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report,accuracy_score,confusion_matrix
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as ldah
 
 def load_data():
     
@@ -156,14 +157,20 @@ def lda(x_train, y, num_components):
 	return  eigenvectors
 
 def fisherfaces(X,y,num_comp_pca, num_com_lda):
-	y = np.asarray(y)
-	[d,n] = X.shape
-	c = len(np.unique(y))
-	[ eigenvectors_pca, mu_pca] = pca(X, y, num_comp_pca)
-	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
-	eigenvectors_lda = lda(w_proj.T, y, num_com_lda)
-	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
-	return [ eigenvectors, mu_pca]
+    y = np.asarray(y)
+    [d,n] = X.shape
+    c = len(np.unique(y))
+    [ eigenvectors_pca, mu_pca] = pca(X, y, num_comp_pca)
+    w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
+    
+    #eigenvectors_lda = lda(w_proj.T, y, num_com_lda)
+    kd = ldah(n_components=num_com_lda, priors=None, shrinkage=None, solver='svd', store_covariance=True)
+    kd.fit(w_proj,y.T)
+    eigenvectors_lda = kd.scalings_[:,:num_com_lda]
+    
+    
+    eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
+    return [ eigenvectors, mu_pca]
 
 def resample_w_pca(W,n0,k):
 	d,n = W.shape
