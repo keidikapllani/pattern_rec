@@ -30,6 +30,8 @@ x_train, y_train, x_test, y_test = load_data()
 #plt.imshow(W[:,50].reshape(46,56).T, cmap = 'gist_gray')
 #
 
+y_alt = pca_classifier(x_train,y_train,x_test,7)
+
 #x_train_pca = np.dot(x_train.T,Ue[:,:100])
 #x_test_pca = np.dot(x_test.T,Ue[:,:100])
 ## 2. Generate and train KNN classifier

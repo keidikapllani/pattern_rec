@@ -228,3 +228,54 @@ def lda_gen(x_train, y, num_components=0):
 	eigenvalues = np.array(eigenvalues[0:num_components].real, dtype=np.float32, copy=True)
 	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
 	return  eigenvectors
+
+
+def pca_classifier(x_train,y_train,x_test,M):
+	'''
+	Alternative PCA classifier based on minimum reconstruction error
+	'''
+	
+	d_tst,n_tst = x_test.shape 	#Dimensions of the test set
+	label = np.unique(y_train)	#Set of classes
+	cln = len(label)			#Number of classes
+	
+	#TRAIN SUBSPACE PCA
+	Wsub = np.zeros((d_tst,8,cln),float) 	   #Eigenvector matrices for each class
+	meanface_s = np.zeros((d_tst,cln),float) #Meanfaces for each class
+	ls = np.zeros((8,cln),float)
+
+	ix = 0
+	for c in range(0,cln):
+		_As = x_train[:,ix:ix+8] #Class subspace training set
+		ix += 8
+		
+		meanface_s[:,c] = _As.mean(axis = 1) #Class mean
+		As = _As - np.reshape(meanface_s[:,c],(d_tst,1))
+		
+		#Find subspace eigenvector matrix
+		Ss = (1 / 8) * np.dot(As.T, As) #Returns a Nc*Nc matrix, Nc = 8
+		_ls, _vs = np.linalg.eig(Ss)
+		#Sort the eigenvalues and eigenvectors
+		idx = _ls.real.argsort()[::-1]   
+		ls[:,c] = _ls[idx]
+		vs = _vs[:,idx]
+		_Wsub = np.dot(As, vs)
+		Wsub[:,:,c] = _Wsub / np.apply_along_axis(np.linalg.norm, 0, _Wsub)
+	
+	#FIT
+	Js_test = np.zeros((cln,n_tst))
+	for c in range(0,cln):
+		#Remove the meanface
+		Phi_s = x_test - np.reshape(meanface_s[:,c],(d_tst,1))
+		#Create the projection vectors
+		ws_test = np.dot(Phi_s.T, np.real(Wsub[:,:M,c])).T
+		#Reconstruct test set using m = 8 PCs
+		recon_test_s = np.dot(np.real(Wsub[:,:M,c]),ws_test[:,:]) + np.reshape(meanface_s[:,c],(d_tst,1))
+		#Test reconstruction error for each face
+		for i in range(0,n_tst):
+			Js_test[c,i] = np.linalg.norm(x_test[:,i] - recon_test_s[:,i])	
+	
+	#Classifier to minimise the reconstruction error
+	y_predict = np.argmin(Js_test,axis = 0) +1
+		
+	return y_predict
