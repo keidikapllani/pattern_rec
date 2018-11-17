@@ -7,6 +7,7 @@ Created on Wed Nov 14 16:53:18 2018
 """
 import numpy as np
 import scipy.io as sio
+
 import random as rnd
 import matplotlib.pyplot as plt
 
@@ -54,7 +55,7 @@ def split_load(ratio):
     '''
     Function to generate test and train sets keeping in class ratios
     '''
-    data = io.loadmat('face.mat')
+    data = sio.loadmat('face.mat')
     data['X']
     # Images
     # N: number of images
@@ -103,26 +104,27 @@ def reconstruct(W, Y, mu=None):
 
 
 def pca(X_train, y_train, M):
-	[d,n] = X_train.shape
-	mu = X_train.mean(axis = 1).reshape(d,1)
-	A = X_train - mu
-	Se = (1 / n) * np.dot(A.T, A) #Returns a N*N matrix
+    [d,n] = X_train.shape
+    mu = X_train.mean(axis = 1).reshape(d,1)
+    A = X_train - mu
+    Se = (1 / n) * np.dot(A.T, A) #Returns a N*N matrix
 	# Calculate eigenvalues `l` and eigenvectors `v`
-	l, V = np.linalg.eig(Se)
+    l, V = np.linalg.eig(Se)
 	# Sort eigenvectors according to decreasing magnitude of eigenvalues
-	idx = l.real.argsort()[::-1]   
-	l = l[idx]
-	V = V[:,idx]
+    idx = l.real.argsort()[::-1]   
+
+    l = l[idx]
+    V = V[:,idx]
 	# Rescale eigenvectors
-	_W = np.dot(A, V)
+    _W = np.dot(A, V)
 	# Normalise eigenvectors
-	W = _W / np.apply_along_axis(np.linalg.norm, 0, _W)
-	return [W, mu]
+    W = _W / np.apply_along_axis(np.linalg.norm, 0, _W)
+    return [W[:,0:M], mu]
 			
 
 
 
-def lda(x_train, y, num_components=0):
+def lda(x_train, y, num_components):
 	d,n = x_train.shape
 	mi = np.zeros((d,52))
 	y = np.asarray(y)
@@ -153,15 +155,15 @@ def lda(x_train, y, num_components=0):
 	eigenvectors = np.array(eigenvectors[0:,0:num_components].real, dtype=np.float32, copy=True)
 	return  eigenvectors
 
-def fisherfaces(X,y,num_components=0):
+def fisherfaces(X,y,num_comp_pca, num_com_lda):
 	y = np.asarray(y)
 	[d,n] = X.shape
 	c = len(np.unique(y))
-	[ eigenvectors_pca, mu_pca] = pca(X, y, (n-c))
+	[ eigenvectors_pca, mu_pca] = pca(X, y, num_comp_pca)
 	w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
-	[eigenvalues_lda, eigenvectors_lda] = lda(w_proj, y, num_components)
+	eigenvectors_lda = lda(w_proj.T, y, num_com_lda)
 	eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
-	return [eigenvalues_lda, eigenvectors, mu_pca]
+	return [ eigenvectors, mu_pca]
 
 def resample_w_pca(W,n0,k):
 	d,n = W.shape
