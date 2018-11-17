@@ -54,10 +54,10 @@ y_alt = pca_classifier(x_train,y_train,x_test,7)
 
 
 #Resampling
-k = 40
-accuracy = np.zeros((k,))
+k = 100
+accuracy = np.zeros((2*k,))
 y_knn = np.zeros((104,k*2))
-subspaces, rn = resample_w_pca(W,10,k)
+subspaces, rn = resample_w_pca(W,5,k)
 for i in range(0,k):
 	Wi= subspaces[i,:,:rn[i]]
 	x_pca = project(Wi,x_train,mu_pca).T
@@ -75,8 +75,8 @@ for i in range(0,k):
 #plt.imshow(np.reshape(np.real(eigen[:,2]),(46,56)).T,cmap = 'gist_gray')
 	
 #Bootstrapping
-k_boot = 40
-accuracy = np.zeros((k_boot,))
+k_boot = 100
+
 #y_knn = np.zeros((104,k_boot))
 x_train_pca = np.dot((x_train-mu_pca).T,W).T
 subfaces, y_sub, rn = resample_faces(x_train_pca,y_train,k_boot)
@@ -92,7 +92,7 @@ for i in range(0,k_boot):
 	knn = KNeighborsClassifier(n_neighbors = 1)
 	knn.fit(x_final, y_sub[i,:rn[i]].T)
 	y_knn[:,k+i] = knn.predict(x_tst_proj)
-	accuracy[i] = 100*accuracy_score(y_test.T, y_knn[:,i])
+	accuracy[i+k] = 100*accuracy_score(y_test.T, y_knn[:,i])
 	
 y_final = np.zeros((104,))
 for i in range(0,104):	
