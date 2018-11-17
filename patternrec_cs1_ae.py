@@ -22,7 +22,17 @@ from facerec import *
 
 ### Load data
 x_train,y_train,x_test,y_test = load_data()
-    
+
+### BASELINE with KNN
+# 1. Generate and train KNN classifier
+knn_classifier = KNeighborsClassifier(n_neighbors = 1,algorithm = 'brute')
+knn_classifier.fit(x_train.T, y_train.T)
+# 2. Classify the test data
+y_pred = knn_classifier.predict(x_test.T)  
+accuracy_knn = 100*accuracy_score(y_test.T, y_pred)
+alfa = knn_classifier.score(x_test.T,y_test.T)
+
+ 
 #______________________________ Start PCA _____________________________________
 #______________________________________________________________________________
     
@@ -156,8 +166,8 @@ plt.tight_layout()
 ### RECOGNITION WITH KNN ###___________________________________________________
 
 # 1. Projection onto subspace
-x_train_pca = np.dot((x_train-meanface).T,Ue[:,:100])
-x_test_pca = np.dot((x_test-meanface).T,Ue[:,:100])
+x_train_pca = np.dot((x_train-meanface).T,Ue[:,:312])
+x_test_pca = np.dot((x_test-meanface).T,Ue[:,:312])
 # 2. Generate and train KNN classifier
 knn_classifier = KNeighborsClassifier(n_neighbors = 1)
 knn_classifier.fit(x_train_pca, y_train.T)
