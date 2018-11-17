@@ -138,3 +138,23 @@ axarr[3].set_title("$\mathbf{\widetilde{x}}_{train}, M = 300$", fontsize = 20)
 plt.tight_layout()
 #______________________________________________________________________________
 
+### CLASSIFICATION SUCCESS FAILURES EXAMPLES __________________________________	
+tst = [2,3,12,13]
+trt = [14,136,48,0]
+_none, axarr = plt.subplots(2, 4)
+for i in range(0,4):
+	#Plot test faces
+	axarr[0,i].imshow(np.reshape(x_test[:,tst[i]],(46,56)).T,cmap = 'gist_gray')
+	axarr[0,i].axis('off')
+	if i == 0 or i == 1:
+		axarr[0,i].set_title("$kNN$ Input", fontsize = 14)
+	else:
+		axarr[0,i].set_title("$Min(J_{rec})$ Input", fontsize = 14)
+	#Plot class face
+	axarr[1,i].imshow(np.reshape(x_train[:,trt[i]],(46,56)).T,cmap = 'gist_gray')
+	axarr[1,i].axis('off')
+	if i == 0 or i == 2:
+		axarr[1,i].set_title("Successfully\nclassified as", fontsize = 14)
+	else:
+		axarr[1,i].set_title("Unsuccessfully\nclassified as", fontsize = 14)
+plt.tight_layout()
