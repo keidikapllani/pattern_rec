@@ -117,3 +117,13 @@ for i in range(0,104):
 	y_final[i] = mode(y_knn[i,:])
 	
 accuracy_final = 100*accuracy_score(y_test.T, y_final)
+
+
+
+
+
+# Print 52 faces ______________________________________________________________
+for i in range(0,416,8):
+	plt.figure()
+	plt.imshow(np.reshape(x_train[:,i],(46,56)).T,cmap = 'gist_gray')
+
