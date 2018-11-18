@@ -305,4 +305,25 @@ def knn(x_train,y_train,x_test,y_test):
 		y_knn[0,i] = y_train[0,idx]
 	accuracy = accuracy_score(y_knn.T, y_test.T)
 	return y_knn,accuracy
-		
+
+def maj_voting(Y_ensamble,y_train):
+	'''
+	Majority voting fusion technique. For tie breaks choose random.
+	Y_ensamble.shape = (n_votes,n_components)
+	'''
+	T,N = Y_ensamble.shape
+	# Identify classes
+	label = np.unique(y_train)
+	C = len(label)
+	y_vote = np.zeros((1,N),int)
+	score = np.zeros((T,C),int)
+	
+	# For each test component
+	for n in range(0,N-1):
+		# Determine the majority vote
+		for c in label:
+			idx = Y_ensamble[:,n] == c
+			score[:,c] = np.sum(Y_ensamble[idx,:n],axis = 0)
+		y_vote[0,n] = np.argmax(score,axis = 0)
+
+	return y_vote
