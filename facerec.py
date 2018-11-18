@@ -323,3 +323,31 @@ def maj_voting(Y_ensamble,y_train):
 		y_vote[0,n] = np.argmax(score,axis = 0)
 
 	return y_vote
+
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=True,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be removed by setting `normalize=False`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title, fontsize = 14)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, fontsize = 0)
+    plt.yticks(tick_marks, classes, fontsize = 0)
+	
+    plt.ylabel('True label', fontsize = 14)
+    plt.xlabel('Predicted label', fontsize = 14)
+	
