@@ -316,14 +316,13 @@ def maj_voting(Y_ensamble,y_train):
 	label = np.unique(y_train)
 	C = len(label)
 	y_vote = np.zeros((1,N),int)
-
-    for i in range(0,N):
-        score = np.zeros((C,))
-        for c in range(1,C):
-            for t in range(0,T):
-                if y_hat[i,t] == c:
-                    score[c] += 1  
-        y_vote[i] = np.argmax(score)
+	for i in range(0,N):
+		score = np.zeros((C,))
+		for c in range(1,C):
+			for t in range(0,T):
+				if Y_ensamble[i,t] == c:
+					score[c] += 1  
+			y_vote[i] = np.argmax(score)
 
 	return y_vote
 
@@ -348,8 +347,8 @@ def plot_confusion_matrix(cm, classes,
     plt.title(title, fontsize = 14)
     plt.colorbar()
     tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, fontsize = 0)
-    plt.yticks(tick_marks, classes, fontsize = 0)
+    plt.xticks(tick_marks, classes, fontsize = 2)
+    plt.yticks(tick_marks, classes, fontsize = 2)
 	
     plt.ylabel('True label', fontsize = 14)
     plt.xlabel('Predicted label', fontsize = 14)

@@ -158,3 +158,24 @@ for i in range(0,4):
 	else:
 		axarr[1,i].set_title("Unsuccessfully\nclassified as", fontsize = 14)
 plt.tight_layout()
+
+### PLOT 4 FIRST EIGENFACES ___________________________________________________
+_none, axarr = plt.subplots(1, 4)
+
+axarr[0].imshow(np.reshape(np.real(W[:,0]),(46,56)).T,cmap = 'gist_gray')
+axarr[0].axis('off')
+axarr[0].set_title("$\mathbf{w}_{1}$", fontsize = 20)
+
+axarr[1].imshow(np.reshape(np.real(W[:,1]),(46,56)).T,cmap = 'gist_gray')
+axarr[1].axis('off')
+axarr[1].set_title("$\mathbf{w}_{2}$", fontsize = 20)
+
+axarr[2].imshow(np.reshape(np.real(W[:,2]),(46,56)).T,cmap = 'gist_gray')
+axarr[2].axis('off')
+axarr[2].set_title("$\mathbf{w}_{3}$", fontsize = 20)
+
+axarr[3].imshow(np.reshape(np.real(W[:,3]),(46,56)).T,cmap = 'gist_gray')
+axarr[3].axis('off')
+axarr[3].set_title("$\mathbf{w}_{4}$", fontsize = 20)
+
+plt.tight_layout()
