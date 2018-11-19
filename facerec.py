@@ -188,7 +188,7 @@ def resample_w_pca(W,n0,k):
 
 def resample_faces(X,Y,k):
 	d,n = X.shape
-	nrange = range(150,416,1)
+	nrange = range(0,364,1)
 	rn = rnd.sample(nrange,k)
 	X_out= np.zeros((k,d,max(rn)))
 	Y_out = np.zeros((k,max(rn)))
@@ -286,21 +286,7 @@ def pca_classifier(x_train,y_train,x_test,M):
 	return y_predict
 
 
-def knn(x_train,y_train,x_test,y_test):
-	d,n = x_train.shape
-	dt,nt = x_test.shape
-	distance = np.zeros((n,))
-	y_knn = np.zeros((1,nt))
-	# for each test face
-	for i in range(0,nt):
-		# measure euclidean distance with each train vector
-		for j in range(0,n):
-			distance[j] = np.linalg.norm(x_test[:,i]-x_train[:,j])
-		idx = np.argmin(distance)
-		
-		y_knn[0,i] = y_train[0,idx]
-	accuracy = accuracy_score(y_knn.T, y_test.T)
-	return y_knn,accuracy
+
 
 def maj_voting(Y_ensamble,y_train):
 	'''
