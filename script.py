@@ -77,6 +77,7 @@ k_boot = 10
 #y_knn = np.zeros((104,k_boot))
 
 x_train_pca = np.dot((x_train-mu_pca).T,W).T
+x_tst_pca = np.dot((x_test-mu_pca).T,W)
 subfaces, y_sub, rn = resample_faces(x_train_pca,y_train,k_boot)
 for i in range(0,k_boot):
     subface = subfaces[i,:,:rn[i]]
@@ -84,6 +85,8 @@ for i in range(0,k_boot):
     kd.fit(subface.T,y_sub[i,:rn[i]].T)   
     w_lda = kd.scalings_
     x_final = np.dot(subface.T,w_lda)
+    
+    
     x_tst_proj = np.dot(x_tst_pca,w_lda)
     knn = KNeighborsClassifier(n_neighbors = 1)
     knn.fit(x_final, y_sub[i,:rn[i]].T)
@@ -94,7 +97,7 @@ for i in range(0,k_boot):
 """
 Maj_voting doesnt currently work.
 """
-final_score = maj_voting	(y_knn.T,y_test)
+final_score = maj_voting	(y_knn,y_test)
 
 
 

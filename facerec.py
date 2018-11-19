@@ -286,7 +286,6 @@ def pca_classifier(x_train,y_train,x_test,M):
 	return y_predict
 
 
-<<<<<<< HEAD
 def knn(x_train,y_train,x_test,y_test):
 	d,n = x_train.shape
 	dt,nt = x_test.shape
@@ -320,9 +319,7 @@ def maj_voting(Y_ensamble,y_train):
 				if Y_ensamble[i,t] == c:
 					score[c] += 1  
 			y_vote[i] = np.argmax(score)
-=======
 
->>>>>>> d51be234a3e074ea71e4d92815f5e2dfe16ac3b9
 
 #def maj_voting(Y_ensamble,y_train):
 #	'''
