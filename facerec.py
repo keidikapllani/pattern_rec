@@ -162,13 +162,9 @@ def fisherfaces(X,y,num_comp_pca, num_com_lda):
     c = len(np.unique(y))
     [ eigenvectors_pca, mu_pca] = pca(X, y, num_comp_pca)
     w_proj = np.dot((X-mu_pca).T,eigenvectors_pca)
-    
-    #eigenvectors_lda = lda(w_proj.T, y, num_com_lda)
     kd = ldah(n_components=num_com_lda, priors=None, shrinkage=None, solver='svd', store_covariance=True)
     kd.fit(w_proj,y.T)
     eigenvectors_lda = kd.scalings_[:,:num_com_lda]
-    
-    
     eigenvectors = np.dot(eigenvectors_pca,eigenvectors_lda)
     return [ eigenvectors, mu_pca]
 
@@ -192,7 +188,7 @@ def resample_w_pca(W,n0,k):
 
 def resample_faces(X,Y,k):
 	d,n = X.shape
-	nrange = range(150,416,1)
+	nrange = range(0,364,1)
 	rn = rnd.sample(nrange,k)
 	X_out= np.zeros((k,d,max(rn)))
 	Y_out = np.zeros((k,max(rn)))
@@ -290,6 +286,7 @@ def pca_classifier(x_train,y_train,x_test,M):
 	return y_predict
 
 
+<<<<<<< HEAD
 def knn(x_train,y_train,x_test,y_test):
 	d,n = x_train.shape
 	dt,nt = x_test.shape
@@ -323,8 +320,30 @@ def maj_voting(Y_ensamble,y_train):
 				if Y_ensamble[i,t] == c:
 					score[c] += 1  
 			y_vote[i] = np.argmax(score)
+=======
 
-	return y_vote
+>>>>>>> d51be234a3e074ea71e4d92815f5e2dfe16ac3b9
+
+#def maj_voting(Y_ensamble,y_train):
+#	'''
+#	Majority voting fusion technique. For tie breaks choose random.
+#	Y_ensamble.shape = (n_votes,n_components)
+#	'''
+#	T,N = Y_ensamble.shape
+#	# Identify classes
+#	label = np.unique(y_train)
+#	C = len(label)
+#	y_vote = np.zeros((1,N),int)
+#
+#    for i in range(0,N):
+#        score = np.zeros((C,))
+#        for c in range(1,C):
+#            for t in range(0,T):
+#                if y_hat[i,t] == c:
+#                    score[c] += 1  
+#        y_vote[i] = np.argmax(score)
+#
+#	return y_vote
 
 
 def plot_confusion_matrix(cm, classes,
