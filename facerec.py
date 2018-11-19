@@ -298,15 +298,14 @@ def maj_voting(Y_ensamble,y_train):
 	label = np.unique(y_train)
 	C = len(label)
 	y_vote = np.zeros((1,N),int)
-	score = np.zeros((T,C),int)
-	
-	# For each test component
-	for n in range(0,N-1):
-		# Determine the majority vote
-		for c in label:
-			idx = Y_ensamble[:,n] == c
-			score[:,c] = np.sum(Y_ensamble[idx,:n],axis = 0)
-		y_vote[0,n] = np.argmax(score,axis = 0)
+
+    for i in range(0,N):
+        score = np.zeros((C,))
+        for c in range(1,C):
+            for t in range(0,T):
+                if y_hat[i,t] == c:
+                    score[c] += 1  
+        y_vote[i] = np.argmax(score)
 
 	return y_vote
 

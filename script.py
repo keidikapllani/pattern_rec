@@ -102,8 +102,20 @@ final_score = maj_voting	(y_knn.T,y_test)
 	
 
 
-# Print 52 faces ______________________________________________________________
+# Plot 52 faces ______________________________________________________________
+c = 1
 for i in range(0,416,8):
 	plt.figure()
 	plt.imshow(np.reshape(x_train[:,i],(46,56)).T,cmap = 'gist_gray')
+	plt.title(f'Class {c}')
+	c += 1
 
+# Plot confusion matrix ______________________________________________________
+# Compute confusion matrix
+cnf_matrix = confusion_matrix(y_test.T, y_test.T)
+np.set_printoptions(precision=2)
+
+# Plot normalized confusion matrix
+plt.figure()
+plot_confusion_matrix(cnf_matrix, classes=[i for i in range(1,53)], normalize=True,
+                      title='Normalized confusion matrix')
