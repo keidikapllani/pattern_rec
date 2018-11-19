@@ -288,26 +288,26 @@ def pca_classifier(x_train,y_train,x_test,M):
 
 
 
-def maj_voting(Y_ensamble,y_train):
-	'''
-	Majority voting fusion technique. For tie breaks choose random.
-	Y_ensamble.shape = (n_votes,n_components)
-	'''
-	T,N = Y_ensamble.shape
-	# Identify classes
-	label = np.unique(y_train)
-	C = len(label)
-	y_vote = np.zeros((1,N),int)
-
-    for i in range(0,N):
-        score = np.zeros((C,))
-        for c in range(1,C):
-            for t in range(0,T):
-                if y_hat[i,t] == c:
-                    score[c] += 1  
-        y_vote[i] = np.argmax(score)
-
-	return y_vote
+#def maj_voting(Y_ensamble,y_train):
+#	'''
+#	Majority voting fusion technique. For tie breaks choose random.
+#	Y_ensamble.shape = (n_votes,n_components)
+#	'''
+#	T,N = Y_ensamble.shape
+#	# Identify classes
+#	label = np.unique(y_train)
+#	C = len(label)
+#	y_vote = np.zeros((1,N),int)
+#
+#    for i in range(0,N):
+#        score = np.zeros((C,))
+#        for c in range(1,C):
+#            for t in range(0,T):
+#                if y_hat[i,t] == c:
+#                    score[c] += 1  
+#        y_vote[i] = np.argmax(score)
+#
+#	return y_vote
 
 
 def plot_confusion_matrix(cm, classes,

@@ -29,10 +29,10 @@ dts,nts = x_test.shape
 accuracy_fda = np.zeros((n,c-1))
 y_fda = np.zeros((n,c-1,nts))
 knn = KNeighborsClassifier(n_neighbors = 1)
-
+accuracy_keidi
 A_train = x_train - mu_pca
 A_test = x_test - mu_pca
-for m_pca in range(1,n):
+for m_pca in range(41,43:
     # Project train and test onto the PCA eigenspace
 	x_train_pca = np.dot(A_train.T,W_pca[:,:m_pca])
 	x_test_pca = np.dot(A_test.T,W_pca[:,:m_pca])
@@ -55,10 +55,10 @@ for m_pca in range(1,n):
 
 # Plot the heatmap of FDA accuracy_____________________________________________
 
-plt.imshow(accuracy_fda.T,aspect = 'auto',cmap = 'RdYlGn')
+plt.imshow(accuracy_keidi.T,aspect = 'auto',cmap = 'YlOrRd')
 cb = plt.colorbar()
 cb.set_label('$\%$ Accuracy',fontsize=14)
 plt.xlabel('$M_{PCA}$', fontsize = 14)
 plt.ylabel('$M_{LDA}$', fontsize = 14)
 plt.title('FDA-NN Classifier accuracy\nas function of the hyperparameters'
-		  , fontsize = 16)
+		  , fontsize = 16)eps
