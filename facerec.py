@@ -302,45 +302,31 @@ def knn(x_train,y_train,x_test,y_test):
 	accuracy = accuracy_score(y_knn.T, y_test.T)
 	return y_knn,accuracy
 
-def maj_voting(Y_ensamble,y_train):
+def maj_voting(Y_models,y_train,y_test):
 	'''
 	Majority voting fusion technique. For tie breaks choose random.
 	Y_ensamble.shape = (n_votes,n_components)
 	'''
-	T,N = Y_ensamble.shape
+	N,T = Y_models.shape
 	# Identify classes
 	label = np.unique(y_train)
 	C = len(label)
-	y_vote = np.zeros((1,N),int)
+
+	y_ensemble = np.zeros((N,))
+	#for each test
 	for i in range(0,N):
-		score = np.zeros((C,))
+		sum = np.zeros((C,))
+		#for each class
 		for c in range(1,C):
-			for t in range(0,T):
-				if Y_ensamble[i,t] == c:
-					score[c] += 1  
-			y_vote[i] = np.argmax(score)
+			#for each model
+			for t in range(0, T):
+				if Y_models[i,t] == c:
+					sum[c] += 1  
+		y_ensemble[i] = np.argmax(sum)        
+    
+	accuracy_ens = 100 * np.sum(y_test.ravel() == y_ensemble) / 104
 
-
-#def maj_voting(Y_ensamble,y_train):
-#	'''
-#	Majority voting fusion technique. For tie breaks choose random.
-#	Y_ensamble.shape = (n_votes,n_components)
-#	'''
-#	T,N = Y_ensamble.shape
-#	# Identify classes
-#	label = np.unique(y_train)
-#	C = len(label)
-#	y_vote = np.zeros((1,N),int)
-#
-#    for i in range(0,N):
-#        score = np.zeros((C,))
-#        for c in range(1,C):
-#            for t in range(0,T):
-#                if y_hat[i,t] == c:
-#                    score[c] += 1  
-#        y_vote[i] = np.argmax(score)
-#
-#	return y_vote
+	return y_ensemble,accuracy_ens
 
 
 def plot_confusion_matrix(cm, classes,

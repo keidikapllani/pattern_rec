@@ -41,7 +41,7 @@ tNs = np.zeros((10,))
 for i in range(0,10):
 	ts = time.time()
 	Se = (1 / N) * np.dot(A.T, A) # N*N matrix
-	wn, Ue = np.linalg.eig(Se)
+	le, Ue = np.linalg.eig(Se)
 	tNs[i]=time.time() - ts	
 tN = tNs.mean(axis=0)
 mN = getsizeof(Se)/1000000

@@ -97,7 +97,7 @@ for i in range(0,k_boot):
 """
 Maj_voting doesnt currently work.
 """
-final_score = maj_voting	(y_knn,y_test)
+y_ensemble,accuracy_ens = maj_voting(y_knn,y_train,y_test)
 
 
 
