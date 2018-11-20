@@ -171,8 +171,8 @@ def fisherfaces(X,y,num_comp_pca, num_com_lda):
 def resample_w_pca(W,n0,k):
 	d,n = W.shape
 #	W0 = W[:,:n0]
-	nrange = range(50,300,1)
-	rn = rnd.sample(nrange,k)
+	nrange = range(n0,n-n0,1)
+	rn = np.random.choice(nrange,k)
 	
 	Wk= np.zeros((k,d,n0+max(rn)))
 	for i in range(0,k):
@@ -180,24 +180,36 @@ def resample_w_pca(W,n0,k):
 		
 		Wk[:,:,:n0] = W[:,:n0]
 		rng = list(range(n0,n,1))
+		while rn[i]>len(rng):
+			rn[i]-=1
 		indx = rnd.sample(rng,rn[i])
 		Wk[i,:,n0:n0+rn[i]] = W[:,indx]
 		
 #		Wk[i,:,:] = np.append(W[:,indx])
 	return Wk,[x + n0 for x in rn]
 
-def resample_faces(X,Y,k):
+def resample_faces(X,Y,n0,k):
 	d,n = X.shape
-	nrange = range(200,n-52,1)
-	rn = rnd.sample(nrange,k)
-	X_out= np.zeros((k,d,max(rn)))
-	Y_out = np.zeros((k,max(rn)))
+	nrange = range(n0,n,1)
+	rn = np.random.choice(nrange,k)
+	X_out= np.zeros((k,d,max(rn)+1))
+	Y_out = np.zeros((k,max(rn)+1))
 	for i in range(0,k):
 		rng = list(range(0,n,1))
+		#Avoid singularity of kNN, when n_samples==n_features
 		indx = rnd.sample(rng,rn[i])
+		while len(indx)==len(np.unique(Y[0,indx])):
+			rn[i] += 1
+			indx = rnd.sample(rng,rn[i])
+			
+			
+			
 		indx.sort()
+		
 		X_out[i,:,:rn[i]] = X[:,indx]
 		Y_out[i,:rn[i]] = Y[0,indx]
+		
+
 	return X_out,Y_out, rn
 
 def lda_gen(x_train, y, num_components=0):

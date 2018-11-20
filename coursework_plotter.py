@@ -159,5 +159,31 @@ for i in range(0,4):
 		axarr[1,i].set_title("Unsuccessfully\nclassified as", fontsize = 14)
 plt.tight_layout()
 
-### PLOT 4 FIRST EIGENFACES ___________________________________________________
-fi
+### PLOT ACCURACY VS T ___________________________________________________
+T_range = np.arange(2,100,5)
+avg_ensamble = accuracy_ens.mean(axis=1)
+avg_models = accuracy_av.mean(axis = 1)
+lines = plt.plot(T_range,avg_ensamble, T_range,avg_models)
+l1, l2 = lines
+plt.setp(l1, linewidth=4, color= '#0055ff')
+plt.setp(l2, linewidth=4, color='#00aa00')
+plt.xlabel('$T$ ~ Number of models', fontsize = 14)
+plt.ylabel('% Accuracy', fontsize = 14)
+plt.title('Ensamble model accuracy\n as a function of the number of models', fontsize = 16)
+plt.legend(['Ensamble', 'Individual models'], fontsize = 14)
+plt.tight_layout()
+
+### PLOT ACCURACY VS T ___________________________________________________
+plt.figure()
+T_range = 2*np.arange(2,100,5)
+avg_ensamble = accuracy_ens[:20].max(axis=1)
+avg_models = accuracy_av[:20].mean(axis = 1)
+lines = plt.plot(T_range,avg_ensamble, T_range,avg_models)
+l1, l2 = lines
+plt.setp(l1, linewidth=4, color= '#0055ff')
+plt.setp(l2, linewidth=4, color='#00aa00')
+plt.xlabel('$T$ ~ Number of models', fontsize = 14)
+plt.ylabel('% Accuracy', fontsize = 14)
+plt.title('Ensemble model accuracy\n as a function of the number of models', fontsize = 16)
+plt.legend(['Ensemble', 'Individual models'], fontsize = 14)
+plt.tight_layout()
