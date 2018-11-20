@@ -19,10 +19,10 @@ x_train, y_train, x_test, y_test = load_data()
 [W_pca, mu_pca] = pca(x_train, y_train, 415)
 
 
-accuracy_fda = np.zeros((n,c-1))
-y_fda = np.zeros((n,c-1,nts))
+#accuracy_fda = np.zeros((n,c-1))
+#y_fda = np.zeros((n,c-1,nts))
 knn = KNeighborsClassifier(n_neighbors = 1)
-accuracy_keidi
+
 A_train = x_train - mu_pca
 A_test = x_test - mu_pca
 
@@ -37,7 +37,14 @@ LDA_model = ldah(priors=None, shrinkage=None, solver='svd', store_covariance=Tru
 LDA_model.fit(x_train_pca,(y_train.T).ravel())		
 W_lda = LDA_model.scalings_[:,:43]
 W_fda = np.dot(W_pca[:,:102],W_lda)
+x_final = np.dot((x_train-mu_pca).T,W_fda)
+x_tst_proj = np.dot((x_test-mu_pca).T,W_fda)
 		# Project onto the FDA
+knn = KNeighborsClassifier(n_neighbors = 1)
+knn.fit(x_final, y_train.T)
+y_knn = knn.predict(x_tst_proj)
+accuracy = 100*accuracy_score(y_test.T, y_knn)
+
 plt.figure()
 
 for i in range(0,4):

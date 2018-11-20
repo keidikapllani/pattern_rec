@@ -188,7 +188,7 @@ def resample_w_pca(W,n0,k):
 
 def resample_faces(X,Y,k):
 	d,n = X.shape
-	nrange = range(0,364,1)
+	nrange = range(200,n-52,1)
 	rn = rnd.sample(nrange,k)
 	X_out= np.zeros((k,d,max(rn)))
 	Y_out = np.zeros((k,max(rn)))
@@ -311,18 +311,18 @@ def maj_voting(Y_models,y_train,y_test):
 	# Identify classes
 	label = np.unique(y_train)
 	C = len(label)
-
+    
 	y_ensemble = np.zeros((N,))
 	#for each test
 	for i in range(0,N):
 		sum = np.zeros((C,))
 		#for each class
-		for c in range(1,C):
+		for c in range(1,C+1):
 			#for each model
 			for t in range(0, T):
 				if Y_models[i,t] == c:
-					sum[c] += 1  
-		y_ensemble[i] = np.argmax(sum)        
+					sum[c-1] += 1  
+		y_ensemble[i] = np.argmax(sum)+1     
     
 	accuracy_ens = 100 * np.sum(y_test.ravel() == y_ensemble) / 104
 
